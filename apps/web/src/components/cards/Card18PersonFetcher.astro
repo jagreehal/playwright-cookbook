@@ -99,6 +99,11 @@
     font-family: system-ui, sans-serif;
   }
 
+  [data-testid^='person-card'] {
+    /* Pin card height so Linux CI font metrics don't shift screenshot bounds. */
+    min-height: 12.375rem;
+  }
+
   dl {
     display: grid;
     grid-template-columns: auto 1fr;
