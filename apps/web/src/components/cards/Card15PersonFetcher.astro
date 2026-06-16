@@ -1,0 +1,160 @@
+<div class="card-15-demo">
+  <div id="app">
+    <p aria-live="polite">Loading…</p>
+  </div>
+  <div
+    id="toast"
+    role="status"
+    data-testid="toast"
+    aria-live="polite"
+    style="position:fixed;bottom:1rem;right:1rem;display:none;padding:1rem;background:#4caf50;color:white;border-radius:4px;"
+  ></div>
+</div>
+
+<script is:inline>
+  (function() {
+    const API_BASE = 'https://swapi.dev/api';
+    const app = document.getElementById('app');
+    let currentPerson = null;
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      if (toast) {
+        toast.textContent = message;
+        toast.style.display = 'block';
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    function renderPerson(person) {
+      currentPerson = person;
+      app.innerHTML = `
+        <h1>Person</h1>
+        <div data-testid="person-card:1">
+          <dl>
+            <dt>Name</dt><dd data-testid="person-name">${person.name}</dd>
+            <dt>Height</dt><dd data-testid="person-height">${person.height}</dd>
+            <dt>Mass</dt><dd data-testid="person-mass">${person.mass || '—'}</dd>
+          </dl>
+          <button type="button" data-testid="edit-person">Edit</button>
+        </div>
+      `;
+
+      const editBtn = app.querySelector('[data-testid="edit-person"]');
+      if (editBtn) {
+        editBtn.addEventListener('click', openEditDialog);
+      }
+    }
+
+    function openEditDialog() {
+      if (!currentPerson) return;
+
+      const dialog = document.createElement('dialog');
+      dialog.setAttribute('aria-label', 'Edit person');
+      dialog.innerHTML = `
+        <form method="dialog">
+          <label for="edit-name">Name</label>
+          <input id="edit-name" name="name" type="text" value="${currentPerson.name}" />
+          <button type="submit" name="save">Save</button>
+        </form>
+      `;
+
+      document.body.appendChild(dialog);
+      dialog.showModal();
+
+      dialog.querySelector('form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = dialog.querySelector('#edit-name').value;
+        if (name) {
+          currentPerson = Object.assign({}, currentPerson, { name: name });
+          renderPerson(currentPerson);
+          showToast('Saved');
+        }
+        dialog.close();
+        dialog.remove();
+      });
+    }
+
+    async function load() {
+      try {
+        const res = await fetch(`${API_BASE}/people/1/`);
+        if (!res.ok) {
+          throw new Error(`SWAPI error ${res.status}`);
+        }
+        const person = await res.json();
+        renderPerson(person);
+      } catch (err) {
+        app.innerHTML = `<h1>Person</h1><p data-testid="error" role="alert">${err.message}</p>`;
+      }
+    }
+
+    load();
+  })();
+</script>
+
+<style>
+  .card-15-demo {
+    font-family: system-ui, sans-serif;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  dt {
+    font-weight: bold;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #0052a3;
+  }
+
+  dialog {
+    padding: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 300px;
+  }
+
+  dialog label {
+    font-weight: bold;
+  }
+
+  dialog input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  [role="alert"] {
+    color: #d32f2f;
+    padding: 1rem;
+    background: #ffebee;
+    border-radius: 4px;
+  }
+</style>

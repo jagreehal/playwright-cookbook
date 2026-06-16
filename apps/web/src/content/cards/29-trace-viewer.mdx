@@ -1,0 +1,52 @@
+# Card 29: Trace Viewer
+
+## What This Pattern Solves
+
+The config sets `trace: 'on-first-retry'` but no card teaches the viewer. When a test fails, the trace is your fastest path to root cause: it records every action, network request, screenshot, console log, and assertion — all on a scrubbable timeline. Without it, you are debugging blind.
+
+## How It Works
+
+1. **Configure trace mode**: `trace: 'on-first-retry'` — traces only recorded when a test retries.
+2. **Run tests**: Playwright writes trace files into `test-results/`.
+3. **Open the trace**: `npx playwright show-trace <path>` or click the trace icon in the HTML report.
+4. **Navigate the viewer**: scrub through actions, inspect network calls, view DOM snapshots, read console logs.
+
+## CLI Commands
+
+```bash
+npx playwright test --trace on
+npx playwright show-trace test-results/.../trace.zip
+npx playwright show-report
+```
+
+## Trace Modes
+
+| Mode | When traces are recorded |
+|------|--------------------------|
+| `'off'` | Never |
+| `'on'` | Every test |
+| `'on-first-retry'` | Only when a test retries (recommended) |
+| `'retain-on-failure'` | On failure, cleaned up on success |
+
+## Run This Example
+
+```bash
+pnpm test src/29-trace-viewer
+npx playwright show-report
+```
+
+## Prerequisites
+
+- **Card 01**: Basic test structure and assertions.
+- **Card 16**: Debugging unhandled requests.
+
+## Key Concepts
+
+- Timeline scrubbing, before/after DOM snapshots, network tab, console tab, source tab.
+- Recommended CI setting: `'on-first-retry'` — no overhead on passing tests.
+
+## Related Patterns
+
+- **Previous**: Card 28 (Component Testing)
+- **Next**: Card 30 (CI Sharding)
+- **Complementary**: Card 16 (Debug Unhandled Requests), Card 22 (Failure Artifacts)

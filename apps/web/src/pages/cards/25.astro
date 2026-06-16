@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card25PersonFetcher from '../../components/cards/Card25PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/25-default-conventions.mdx';
+---
+
+<CardLayout title="Default Conventions" cardNumber="25">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 This component is what the Playwright test interacts with:
+    </p>
+    <div class="demo-container">
+      <Card25PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/25-default-conventions" />
+  </section>
+</CardLayout>

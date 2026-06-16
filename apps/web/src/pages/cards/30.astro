@@ -1,0 +1,30 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card01PersonFetcher from '../../components/cards/Card01PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/30-ci-sharding-and-merge-reports.mdx';
+
+const cardNumber = '30';
+const cardTitle = 'CI Sharding & Merge Reports';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 This component is what the Playwright test interacts with:
+    </p>
+    <div class="demo-container">
+      <Card01PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/30-ci-sharding-and-merge-reports" />
+  </section>
+</CardLayout>

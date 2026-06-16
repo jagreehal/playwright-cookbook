@@ -1,0 +1,48 @@
+---
+/**
+ * Login page — same behavior as src/app/login.html for Playwright tests.
+ */
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log in</title>
+  </head>
+  <body>
+    <main>
+      <h1>Log in</h1>
+      <form id="login-form" aria-label="Login form">
+        <div id="login-error" data-testid="login-error" role="alert" style="display:none; color:#d32f2f; margin-bottom:1rem;"></div>
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required />
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required />
+        <button type="submit">Log in</button>
+      </form>
+    </main>
+    <script is:inline>
+      const VALID_USERS = { testuser: 'password', admin: 'adminpass', alice: 'secret' };
+
+      document.getElementById('login-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorEl = document.getElementById('login-error');
+
+        if (username && password) {
+          if (VALID_USERS[username] === password) {
+            errorEl.style.display = 'none';
+            localStorage.setItem('auth', '1');
+            localStorage.setItem('user', username);
+            window.location.href = '/protected';
+            return;
+          }
+          errorEl.textContent = 'Invalid username or password';
+          errorEl.style.display = 'block';
+        }
+      });
+    </script>
+  </body>
+</html>

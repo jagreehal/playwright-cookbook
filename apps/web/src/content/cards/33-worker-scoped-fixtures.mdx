@@ -1,0 +1,54 @@
+# Card 33: Worker-Scoped Fixtures
+
+## What This Pattern Solves
+
+All current fixtures are test-scoped. For expensive setup (database connection, server start), creating it per test wastes time. Worker-scoped fixtures run once per worker process and are shared across all tests in that worker.
+
+## How It Works
+
+1. Define a fixture with `scope: 'worker'`. Setup runs once per worker, teardown once when the worker exits.
+2. Tests in the same worker receive the same fixture value.
+3. Test-scoped fixtures can depend on worker-scoped fixtures.
+4. Worker-scoped fixtures cannot depend on test-scoped fixtures (no `{ page }` in worker scope).
+
+## Code Example
+
+```typescript
+const test = base.extend<{ db: Database }, { dbPool: Pool }>({
+  dbPool: [async ({}, use) => {
+    const pool = new Pool({ maxConnections: 5 });
+    await use(pool);
+    await pool.close();
+  }, { scope: 'worker' }],
+
+  db: async ({ dbPool }, use) => {
+    const conn = await dbPool.acquire();
+    await use(new Database(conn));
+    await dbPool.release(conn);
+  },
+});
+```
+
+## Run This Example
+
+```bash
+pnpm test src/33-worker-scoped-fixtures
+```
+
+## Key Concepts
+
+- **`scope: 'worker'`**: Setup once per worker, teardown once per worker exit.
+- **`scope: 'test'`** (default): Setup/teardown for every test.
+- **Use cases**: DB pools, API servers, Docker containers, auth token caches.
+
+## Common Mistakes
+
+1. Using `page` in a worker fixture (not available at worker scope).
+2. Sharing mutable state between tests via worker fixture.
+3. Forgetting teardown after `use()`.
+
+## Related Patterns
+
+- **Previous**: Card 32 (Mobile & Emulation)
+- **Next**: Card 34 (Retries & Soft Assertions)
+- **Complementary**: Card 21 (App Driver Fixture), Card 26 (Full Architecture)

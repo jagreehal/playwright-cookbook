@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card06PersonFetcher from '../../components/cards/Card06PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/06-record-and-replay-fixtures.mdx';
+---
+
+<CardLayout title="Record and Replay Fixtures" cardNumber="06">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 Test uses recorded fixture from real API:
+    </p>
+    <div class="demo-container">
+      <Card06PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/06-record-and-replay-fixtures" />
+  </section>
+</CardLayout>

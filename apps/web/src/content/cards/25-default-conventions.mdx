@@ -1,0 +1,21 @@
+# Card 25: Default conventions (index)
+
+This card does not add new code; it lists the **default conventions** from the cookbook and points to the card that demonstrates each.
+
+| Convention | Card |
+|------------|------|
+| Tests describe behavior; they don't know selectors | [12-locators-actions-flows](./12-locators-actions-flows/README.md) |
+| Selectors: getByRole/getByLabel first; data-testid for repeated/dynamic UI | [13-scoped-queries](./13-scoped-queries/README.md) |
+| Every interaction has a done signal (URL/response/toast/state change) | [15-done-signals](./15-done-signals/README.md) |
+| No waitForTimeout in committed code | (policy; see [15-done-signals](./15-done-signals/README.md)) |
+| Page/region objects expose assertLoaded() and stay small | [12-locators-actions-flows](./12-locators-actions-flows/README.md), [14-region-objects](./14-region-objects/README.md) |
+| Cross-page actions return next page object | [12-locators-actions-flows](./12-locators-actions-flows/README.md) (PersonPage.open) |
+| Auth via storageState + one UI login smoke test | [19-auth-storage-state](./19-auth-storage-state/README.md) |
+| Test data via API factories; UI setup only when testing that UI | [20-api-seeding-cleanup](./20-api-seeding-cleanup/README.md) |
+| Trace on first retry, screenshot on failure; test.step for major actions | [21-app-driver-fixture](./21-app-driver-fixture/README.md), [22-failure-artifacts](./22-failure-artifacts/README.md) |
+| Axe (or similar) for accessibility | [17-accessibility-axe](./17-accessibility-axe/README.md) |
+| Scoped queries to avoid wrong element | [13-scoped-queries](./13-scoped-queries/README.md), [18-stability-techniques](./18-stability-techniques/README.md) |
+| Cleanup that always runs (finally) | [20-api-seeding-cleanup](./20-api-seeding-cleanup/README.md) |
+| Unique naming for parallel runs | [20-api-seeding-cleanup](./20-api-seeding-cleanup/README.md) |
+| API-only tests use `request` fixture (no browser) | [23-api-only-tests](./23-api-only-tests/README.md) |
+| Same logic, multiple inputs: parameterize with a loop | [24-parameterized-tests](./24-parameterized-tests/README.md) |

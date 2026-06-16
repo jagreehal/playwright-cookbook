@@ -1,0 +1,65 @@
+# Card 31: Network HAR — Record & Replay
+
+## What This Pattern Solves
+
+Card 06 records API responses as JSON fixtures. Playwright also has a built-in HAR (HTTP Archive) path: record real network traffic at the browser level, save it as a `.har` file, and replay it with `routeFromHAR()`. Useful for capturing every request or needing exact response headers and timing.
+
+## How It Works
+
+1. **Record**: Use `contextOptions.recordHar` to capture all network traffic into `./test/fixtures/swapi-people-1.har`; the file is flushed when the context closes.
+2. **Replay**: Call `page.routeFromHAR('./test/fixtures/swapi-people-1.har', \{ url, notFound \})` to serve responses from the HAR. The replay test asserts the recorded `person-name` is `HAR Recorded Luke` without any `route.fulfill`.
+3. The HAR contains full request/response pairs: URL, method, status, headers, body, timing.
+
+The spec walks through three steps: explicit `route.fulfill` mocking, recording a HAR while serving a fulfilled response, then replaying that recorded response with `routeFromHAR`.
+
+## Code Example
+
+```typescript
+// RECORD: capture all traffic for this context into a .har file.
+const context = await browser.newContext({
+  recordHar: {
+    path: './test/fixtures/swapi-people-1.har',
+    mode: 'full',
+    content: 'embed',
+  },
+});
+const page = await context.newPage();
+await page.goto('/cards/01');
+await context.close(); // the HAR is flushed on context close
+
+// REPLAY: serve only the SWAPI call from the recorded HAR; the page loads live.
+// notFound: 'abort' fails loudly if a matched request is missing from the HAR.
+await page.routeFromHAR('./test/fixtures/swapi-people-1.har', {
+  url: '**/swapi.dev/**',
+  notFound: 'abort',
+});
+
+await page.goto('/cards/01');
+// The body comes straight from the recorded HAR entry, no route.fulfill here.
+await expect(page.getByTestId('person-name')).toHaveText('HAR Recorded Luke');
+```
+
+## CLI Shortcut
+
+```bash
+npx playwright test --save-har=./test/fixtures/app.har
+npx playwright test --save-har-glob='**/api/**'
+```
+
+## Run This Example
+
+```bash
+pnpm test src/31-network-har
+```
+
+## Key Concepts
+
+- **`recordHar`**: Context-level option. Modes: `'full'`, `'minimal'`. Content: `'embed'`, `'omit'`, `'attach'`.
+- **`routeFromHAR`**: Page-level replay. Filter with `url` glob, control unmatched with `notFound`.
+- **HAR vs JSON fixtures**: HAR records everything (headers, timing). JSON fixtures are simpler and easier to patch.
+
+## Related Patterns
+
+- **Previous**: Card 30 (CI Sharding)
+- **Next**: Card 32 (Mobile & Emulation)
+- **Complementary**: Card 06 (Record & Replay Fixtures)

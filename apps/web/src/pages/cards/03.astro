@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card03PersonFetcher from '../../components/cards/Card03PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/03-full-mock-payload.mdx';
+---
+
+<CardLayout title="Full Mock Payload" cardNumber="03">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 This component shows all three fields (name, height, mass):
+    </p>
+    <div class="demo-container">
+      <Card03PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/03-full-mock-payload" />
+  </section>
+</CardLayout>

@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card16PersonFetcher from '../../components/cards/Card16PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/16-debug-unhandled-requests.mdx';
+---
+
+<CardLayout title="Debug Unhandled Requests" cardNumber="16">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 This component is what the Playwright test interacts with:
+    </p>
+    <div class="demo-container">
+      <Card16PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/16-debug-unhandled-requests" />
+  </section>
+</CardLayout>

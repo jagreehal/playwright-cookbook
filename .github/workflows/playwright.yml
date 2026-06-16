@@ -1,0 +1,61 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Shard the suite across runners. Each shard emits a blob report; a final job
+  # merges the blobs into one HTML report (playwright-ci).
+  test:
+    name: Test (shard ${{ matrix.shard }}/${{ strategy.job-total }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Run tests (shard ${{ matrix.shard }})
+        run: pnpm exec playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report
+          retention-days: 7
+
+  merge-reports:
+    name: Merge reports
+    if: ${{ !cancelled() }}
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+      - name: Merge into HTML report
+        run: pnpm exec playwright merge-reports --reporter html ./all-blob-reports
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report
+          retention-days: 14

@@ -1,0 +1,54 @@
+# Card 36: File Uploads & Downloads
+
+## What This Pattern Solves
+
+Forms upload files; pages generate downloads; users paste content. Testing these patterns requires simulating file selection, capturing download events, and reading clipboard.
+
+## How It Works
+
+1. **`setInputFiles()`**: Set file(s) on `<input type="file">` with in-memory buffers.
+2. **`page.waitForEvent('download')`**: Capture a download triggered by a click.
+3. **Clipboard**: Use `navigator.clipboard.readText()` / `writeText()` for copy/paste.
+
+## Code Example
+
+```typescript
+// Upload an in-memory file (no file on disk needed)
+await page.getByTestId('file-input').setInputFiles({
+  name: 'test-document.txt',
+  mimeType: 'text/plain',
+  buffer: Buffer.from('Hello, Playwright file upload!'),
+});
+
+// Download: register waitForEvent before the click that triggers it
+const [download] = await Promise.all([
+  page.waitForEvent('download'),
+  page.getByTestId('download-btn').click(),
+]);
+expect(download.suggestedFilename()).toBe('users.csv');
+```
+
+## Run This Example
+
+```bash
+pnpm test src/36-file-uploads-downloads
+```
+
+## Key Concepts
+
+- **`locator.setInputFiles(files)`**: Accepts file paths or `{ name, mimeType, buffer }`.
+- **`page.waitForEvent('download')`**: Must register before the trigger.
+- **`Download.suggestedFilename()`**, `.url()`, `.path()`: Inspect the download.
+- **Clipboard permissions**: Requires `clipboard-read`/`clipboard-write` grant.
+
+## Common Mistakes
+
+1. Forgetting `Promise.all` for download capture.
+2. Using real files instead of in-memory buffers.
+3. Not granting clipboard permissions for clipboard tests.
+
+## Related Patterns
+
+- **Previous**: Card 35 (Multi-Tab & Multi-Context)
+- **Next**: Card 37 (Global Setup & Teardown)
+- **Complementary**: Card 31 (Network HAR)

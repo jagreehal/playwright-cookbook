@@ -1,0 +1,78 @@
+<div class="card-11-demo">
+  <div class="demo-body">
+    <h1>Log in</h1>
+    <form id="login-form" aria-label="Login form">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" required />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required />
+
+      <button type="submit">Log in</button>
+    </form>
+
+    <div id="protected-content" style="display: none;">
+      <h1>Dashboard</h1>
+      <p data-testid="dashboard-message">Welcome, <span id="username-display"></span>!</p>
+    </div>
+  </main>
+</div>
+
+<script is:inline>
+  (function() {
+    const form = document.getElementById('login-form');
+    const protectedContent = document.getElementById('protected-content');
+
+    if (form && protectedContent) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (username && password) {
+          localStorage.setItem('auth', '1');
+          localStorage.setItem('user', username);
+
+          // Show protected content
+          form.parentElement.style.display = 'none';
+          protectedContent.style.display = 'block';
+          document.getElementById('username-display').textContent = username;
+        }
+      });
+    }
+  })();
+</script>
+
+<style>
+  form {
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  label {
+    font-weight: bold;
+  }
+
+  input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  button {
+    padding: 0.75rem;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #0052a3;
+  }
+</style>

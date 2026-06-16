@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card19PersonFetcher from '../../components/cards/Card19PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/19-auth-storage-state.mdx';
+---
+
+<CardLayout title="Auth Storage State" cardNumber="19">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 This component is what the Playwright test interacts with:
+    </p>
+    <div class="demo-container">
+      <Card19PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/19-auth-storage-state" />
+  </section>
+</CardLayout>

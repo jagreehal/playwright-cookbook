@@ -1,0 +1,110 @@
+# Card 11: Login Flow (Forms & Navigation)
+
+## What This Pattern Solves
+
+Most applications have forms, navigation, and multi-page flows. This card shows how to interact with form elements, submit them, and assert on navigation, going beyond the read-only tests from earlier cards.
+
+## How It Works
+
+1. Navigate to the login page
+2. Use `getByLabel()` to find form inputs (accessibility-friendly)
+3. Use `fill()` to enter text
+4. Use `Promise.all()` to wait for navigation while clicking submit
+5. Assert on the new URL and page content
+
+These are the interaction patterns you reach for in most tests: clicking, typing, and navigating.
+
+## Code Example
+
+```typescript
+test('fills login form and navigates to protected page', async ({ page }) => {
+  await page.goto('/login');
+
+  // Fill form using accessible labels
+  await page.getByLabel('Username').fill('testuser');
+  await page.getByLabel('Password').fill('password');
+
+  // Submit and wait for navigation
+  await Promise.all([
+    page.waitForURL(/protected/),
+    page.getByRole('button', { name: 'Log in' }).click(),
+  ]);
+
+  // Assert we're on protected page
+  await expect(page).toHaveURL(/protected/);
+  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+});
+```
+
+## Run This Example
+
+```bash
+pnpm test src/11-login-flow
+```
+
+## Prerequisites
+
+- **Card 01-02**: Understanding page.goto() and basic assertions
+- Concepts: Form interactions, URL assertions, multi-page flows
+
+## Key Concepts
+
+- **getByLabel()**: Finds inputs by their `<label>` text (accessibility-friendly, robust to markup changes)
+- **fill()**: Types text into an input field (clears first, then types)
+- **Promise.all([waitForURL, click])**: Prevents race conditions when clicks trigger navigation
+- **expect(page).toHaveURL()**: Asserts current URL matches a pattern
+- **page.evaluate()**: Runs JavaScript in the browser context to access localStorage, etc.
+
+## When to Use This Pattern
+
+- ✓ Testing login flows, forms, and multi-step processes
+- ✓ Verifying navigation after user actions
+- ✓ Checking client-side state (localStorage, cookies)
+- ✓ Any test that goes beyond read-only assertions
+- ✗ When you can skip the UI and set storage state directly (see Card 19)
+
+## Common Mistakes
+
+- **Clicking without waiting for navigation**: Always use `Promise.all([waitForURL, click])` when clicks trigger navigation
+  ```typescript
+  // ❌ WRONG - race condition
+  await page.getByRole('button').click();
+  await expect(page).toHaveURL(/protected/);
+
+  // ✓ CORRECT - wait for navigation to start
+  await Promise.all([
+    page.waitForURL(/protected/),
+    page.getByRole('button').click(),
+  ]);
+  ```
+
+- **Using CSS selectors instead of accessibility queries**: Prefer `getByLabel()`, `getByRole()` over `locator('#username')`
+- **Not checking navigation happened**: Always assert on final URL or page content
+- **Hardcoding wait times**: Use `waitForURL()` instead of `waitForTimeout()`
+
+## Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Test
+    participant Browser
+    participant LoginPage
+    participant ProtectedPage
+
+    Test->>Browser: page.goto('/login')
+    Browser->>LoginPage: Load login page
+    Test->>LoginPage: fill('Username', 'testuser')
+    Test->>LoginPage: fill('Password', 'password')
+    Test->>LoginPage: click('Log in') + waitForURL
+    LoginPage->>LoginPage: Store auth in localStorage
+    LoginPage->>Browser: Navigate to /protected
+    Browser->>ProtectedPage: Load protected page
+    Test->>ProtectedPage: expect URL /protected ✓
+    Test->>ProtectedPage: expect heading 'Dashboard' ✓
+```
+
+## Related Patterns
+
+- **Previous**: Card 02 (Mock Your First API), basic page assertions
+- **Next**: Card 12 (Locators, Actions, Flows), refactor this inline code into reusable layers
+- **Advanced**: Card 19 (Auth Storage State), skip the login UI by loading storage state directly

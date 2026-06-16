@@ -1,0 +1,251 @@
+# Card 15: Done Signals and waitForApi
+
+## What This Pattern Solves
+
+A test clicks "Save" and immediately asserts the toast appears — but the toast hasn't rendered yet. Someone "fixes" it with `await page.waitForTimeout(2000)`. Now the suite is slow and still flakes when CI is under load. Or a test does `page.goto('/dashboard')` and asserts on data that hasn't loaded — the API call is still in flight. The root cause is the same: an **interaction without a done signal**.
+
+Every interaction that changes state (clicks, navigations, form submissions) must be paired with an explicit, observable completion signal before the test proceeds. For API-driven pages, the `waitForApi` helper gives you a precise, timeout-free way to wait for a specific network response. This pattern eliminates `waitForTimeout` and reduces flake to near zero.
+
+## How It Works
+
+1. **Define a "done signal"** for every state-changing interaction — a specific, observable condition that means "the operation finished."
+2. For API-driven loads: start `waitForApi(page, { urlPart: '/people/1' })` before navigation, `await` the promise after `goto`, then assert the response was OK.
+3. For modal saves: click Save, then wait for the dialog to become hidden AND the success toast to appear — two signals together mean the save completed and the UI updated.
+4. For form submissions: use `Promise.all([page.waitForURL(/success/), clickSubmit])` to couple the navigation signal with the click — no race condition.
+5. Never use `waitForTimeout` — if you can't find a done signal, the UI is missing an observable state change (add one, or use `waitForApi` to watch the network).
+
+## Code Example
+
+```typescript
+// ── helpers/waitForApi.ts ─────────────────────────────────
+import type { Page, Response } from '@playwright/test';
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+export interface WaitForApiOptions {
+  /** Substring matched against the response URL. */
+  urlPart: string;
+  /** Restrict the match to one HTTP method. */
+  method?: HttpMethod;
+  /**
+   * Only match a successful (2xx/3xx) response. Defaults to true.
+   * Set to false to wait for an error response (e.g. a 500 done-signal).
+   */
+  ok?: boolean;
+}
+
+export function waitForApi(page: Page, opts: WaitForApiOptions): Promise<Response> {
+  const { urlPart, method, ok = true } = opts;
+  return page.waitForResponse(
+    (r) =>
+      r.url().includes(urlPart) &&
+      (!method || r.request().method() === method) &&
+      (!ok || r.ok()),
+  );
+}
+```
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { waitForApi } from '../e2e-patterns/helpers/waitForApi';
+import { ToastRegion } from '../e2e-patterns/regions/ToastRegion';
+import { DialogRegion } from '../e2e-patterns/regions/DialogRegion';
+import { makePerson } from '../swapi/builders';
+
+test.describe('15-done-signals: Done signals and waitForApi', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/swapi.dev/api/people/1/**', (route) =>
+      route.fulfill({
+        json: makePerson({
+          name: 'Luke Skywalker',
+          height: '172',
+          mass: '77',
+          url: 'https://swapi.dev/api/people/1/',
+        }),
+      }),
+    );
+  });
+
+  test('waitForApi: wait for people/1 response then assert page loaded', async ({
+    page,
+  }) => {
+    // Start waiting BEFORE navigation
+    const responsePromise = waitForApi(page, { urlPart: '/people/1' });
+    await page.goto('/cards/15');
+    // Await AFTER navigation — response arrives during load
+    const response = await responsePromise;
+    expect(response.ok()).toBe(true);
+
+    await expect(page.getByRole('heading', { name: 'Person' })).toBeVisible();
+    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+  });
+
+  test('done signal for modal save: wait dialog hidden and toast', async ({
+    page,
+  }) => {
+    await page.goto('/cards/15');
+    await expect(page.getByRole('heading', { name: 'Person' })).toBeVisible();
+
+    await page.getByTestId('edit-person').click();
+    const dialog = new DialogRegion(page, 'Edit person');
+    await dialog.expectVisible();
+
+    // DialogRegion query methods return a Locator synchronously — no double await
+    await dialog.getByLabel('Name').fill('Leia');
+    await dialog.getButton(/save/i).click();
+
+    // DONE SIGNALS: two confirmations that save completed
+    await dialog.expectHidden(); // Signal 1: dialog closed
+    const toast = new ToastRegion(page);
+    await toast.expectSuccess(/saved/i); // Signal 2: success toast shown
+  });
+});
+```
+
+## Run This Example
+
+```bash
+pnpm test src/15-done-signals
+```
+
+## Prerequisites
+
+- **Card 02**: Understanding `page.route()` and request interception
+- **Card 14**: Region objects (DialogRegion, ToastRegion) used in the done signal examples
+- Concepts: Promises, async/await, network request/response lifecycle
+
+## Key Concepts
+
+- **Done signal**: An explicit, observable condition that confirms a state-changing interaction completed. Examples: dialog hidden, toast visible, URL changed, API response received, element appeared/disappeared.
+- **waitForApi**: A helper that wraps `page.waitForResponse()` with a declarative API — match by URL substring and optional HTTP method. Returns the response so you can assert on status, headers, or body.
+- **Initiate promise before action**: Start waiting (`const p = waitForApi(...)`) before the action that triggers the request (`page.goto(...)`), then `await p` after. This avoids the race where the response arrives before you start listening.
+- **Compound done signals**: After a save operation, wait for BOTH the dialog to hide AND the toast to appear. A single signal (e.g., just the toast) might appear before the dialog fully closes, leading to DOM conflicts.
+- **No waitForTimeout**: Every `waitForTimeout(N)` in your suite is a bug waiting to surface. Replace it with a specific done signal — if none exists, the UI needs an observable state (aria-live region, loading spinner disappearing, etc.).
+
+## When to Use This Pattern
+
+- ✓ Every test that triggers an API call — pair the trigger with a done signal
+- ✓ Page loads that depend on API data (start `waitForApi` before `goto`)
+- ✓ Form submissions, saves, deletes — wait for confirmation UI (toast, redirect, dialog close)
+- ✓ Any place you're tempted to write `waitForTimeout` — find or create a done signal instead
+- ✓ Multi-step workflows where step N depends on step N-1 completing
+- ✗ Pure client-side interactions with no async effect (e.g., toggling a checkbox that doesn't call an API)
+- ✗ When the UI already provides a Playwright auto-waited assertion (e.g., `expect(element).toBeVisible()` already waits)
+
+## Common Mistakes
+
+1. **Using waitForTimeout instead of a done signal**:
+   ```typescript
+   // ✗ WRONG — arbitrary timeout, slow AND flaky
+   await page.getByRole('button', { name: 'Save' }).click();
+   await page.waitForTimeout(3000);
+   await expect(toast).toBeVisible();
+
+   // ✓ CORRECT — specific done signals
+   await page.getByRole('button', { name: 'Save' }).click();
+   await expect(dialog).toBeHidden();     // Wait for dialog to close
+   await expect(toast).toBeVisible();     // Wait for toast to appear
+   ```
+
+2. **Starting waitForApi AFTER the action**:
+   ```typescript
+   // ✗ WRONG — response may have already arrived
+   await page.goto('/cards/15');
+   const response = await waitForApi(page, { urlPart: '/people/1' });
+   // Race condition: response might resolve immediately or never
+
+   // ✓ CORRECT — start waiting BEFORE the action
+   const responsePromise = waitForApi(page, { urlPart: '/people/1' });
+   await page.goto('/cards/15');
+   const response = await responsePromise; // response was captured during load
+   ```
+
+3. **Waiting for only one signal when the operation has multiple completion indicators**:
+   ```typescript
+   // ✗ WRONG — dialog might still be in the DOM, causing stale element errors
+   await clickSave();
+   await expect(toast).toBeVisible();
+   await page.getByTestId('edit-person').click(); // 💥 dialog still closing
+
+   // ✓ CORRECT — wait for both signals
+   await clickSave();
+   await expect(dialog).toBeHidden();    // Ensure dialog fully removed
+   await expect(toast).toBeVisible();    // Ensure save completed
+   ```
+
+4. **Not asserting on the response in waitForApi**:
+   ```typescript
+   // ✗ WRONG — ignoring the response
+   const response = await waitForApi(page, { urlPart: '/people/1' });
+   // Never check response.ok() — 500 slips through silently
+
+   // ✓ CORRECT — assert the response is healthy
+   const response = await waitForApi(page, { urlPart: '/people/1' });
+   expect(response.ok()).toBe(true);
+   ```
+
+5. **Matching the wrong URL pattern in waitForApi**:
+   ```typescript
+   // ✗ WRONG — too narrow, misses query params or trailing slash variations
+   waitForApi(page, { urlPart: 'https://swapi.dev/api/people/1' });
+
+   // ✓ CORRECT — match on the stable path segment
+   waitForApi(page, { urlPart: '/people/1' });
+   ```
+
+## Flow Diagram
+
+```mermaid
+sequenceDiagram
+    participant Test
+    participant waitForApi Helper
+    participant Browser
+    participant API Route
+    participant UI (Dialog, Toast)
+
+    Note over Test: Pattern 1: waitForApi for page load
+
+    Test->>waitForApi Helper: waitForApi(page, { urlPart: '/people/1' })
+    Note over waitForApi Helper: Listening for matching response...
+
+    Test->>Browser: page.goto('/cards/15')
+    Browser->>API Route: GET /people/1
+    API Route-->>Browser: 200 + Luke Skywalker
+
+    waitForApi Helper->>waitForApi Helper: Match: url includes '/people/1' ✓<br/>Response OK ✓
+    waitForApi Helper-->>Test: APIResponse (status 200)
+    Test->>Test: expect(response.ok()).toBe(true) ✓
+
+    Test->>Browser: expect heading 'Person' visible
+    Browser-->>Test: ✓
+    Test->>Browser: expect person-name 'Luke Skywalker'
+    Browser-->>Test: ✓
+
+    Note over Test: Pattern 2: Done signals for modal save
+
+    Test->>Browser: click 'edit-person'
+    Browser-->>Test: Dialog opens
+
+    Test->>UI (Dialog, Toast): expect(dialog).toBeVisible()
+    UI (Dialog, Toast)-->>Test: ✓
+
+    Test->>UI (Dialog, Toast): fill('Name', 'Leia')
+    Test->>UI (Dialog, Toast): click Save button
+
+    Note over Test: Done signals — wait for BOTH
+
+    Test->>UI (Dialog, Toast): expect(dialog).toBeHidden()
+    UI (Dialog, Toast)-->>Test: Signal 1: dialog closed ✓
+
+    Test->>UI (Dialog, Toast): expect(toast).toContainText(/saved/i)
+    UI (Dialog, Toast)-->>Test: Signal 2: success toast ✓
+```
+
+## Related Patterns
+
+- **Previous**: Card 14 (Region Objects) — DialogRegion and ToastRegion provide the assertion helpers used as done signals
+- **Next**: Card 16 (Debug Unhandled Requests) — When your waitForApi never resolves, debug what's going wrong
+- **Foundation**: Card 12 (Locators → Actions → Flows) — Actions include done signals by design
+- **Foundation**: Card 11 (Login Flow) — `Promise.all([waitForURL, click])` is a done signal pattern
+- **Stability**: Card 18 (Stability Techniques) — Done signals are the core anti-flake strategy
+- **Complementary**: Card 10 (Per-Test Overrides) — Combine with error-scenario mocks to test failure done signals

@@ -1,0 +1,63 @@
+<div class="card-23-demo">
+  <div id="app">
+    <p aria-live="polite">Loading…</p>
+  </div>
+</div>
+
+<script>
+  const API_BASE = 'https://swapi.dev/api';
+  const app = document.getElementById('app');
+
+  async function load() {
+    try {
+      const res = await fetch(`${API_BASE}/people/1/`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`SWAPI error ${res.status}: ${text}`);
+      }
+      const person = await res.json();
+
+      app.innerHTML = `
+        <h1>Person</h1>
+        <div data-testid="person-card:1">
+          <dl>
+            <dt>Name</dt><dd data-testid="person-name">${person.name}</dd>
+            <dt>Height</dt><dd data-testid="person-height">${person.height}</dd>
+            <dt>Mass</dt><dd data-testid="person-mass">${person.mass}</dd>
+          </dl>
+        </div>
+      `;
+    } catch (err) {
+      app.innerHTML = `<h1>Person</h1><p data-testid="error" role="alert">${err.message}</p>`;
+    }
+  }
+
+  load();
+</script>
+
+<style>
+  .card-23-demo {
+    font-family: system-ui, sans-serif;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.5rem 1rem;
+  }
+
+  dt {
+    font-weight: bold;
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  [role="alert"] {
+    color: #d32f2f;
+    padding: 1rem;
+    background: #ffebee;
+    border-radius: 4px;
+  }
+</style>

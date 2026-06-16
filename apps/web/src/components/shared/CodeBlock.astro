@@ -1,0 +1,13 @@
+---
+interface Props {
+  language?: string;
+  code?: string;
+}
+
+const { language = 'typescript', code } = Astro.props;
+const codeContent = code || (await Astro.slots.render('default'));
+const langLabel = language === 'bash' ? 'shell' : language;
+---
+
+<pre class="code-block" data-lang={langLabel}><code class={`language-${language}`}
+>{codeContent}</code></pre>

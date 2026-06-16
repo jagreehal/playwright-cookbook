@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card10PersonFetcher from '../../components/cards/Card10PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/10-per-test-overrides.mdx';
+---
+
+<CardLayout title="Per-Test Overrides" cardNumber="10">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 Tests override default mocks for error scenarios:
+    </p>
+    <div class="demo-container">
+      <Card10PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/10-per-test-overrides" />
+  </section>
+</CardLayout>

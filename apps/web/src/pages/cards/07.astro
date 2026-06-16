@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card07PersonFetcher from '../../components/cards/Card07PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/07-patch-fixtures.mdx';
+---
+
+<CardLayout title="Patch Fixtures for Edge Cases" cardNumber="07">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 Test patches fixtures for specific scenarios:
+    </p>
+    <div class="demo-container">
+      <Card07PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/07-patch-fixtures" />
+  </section>
+</CardLayout>

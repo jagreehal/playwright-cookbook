@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card08PersonFetcher from '../../components/cards/Card08PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/08-validate-with-zod.mdx';
+---
+
+<CardLayout title="Validate with Zod Schemas" cardNumber="08">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 Test validates API responses with Zod:
+    </p>
+    <div class="demo-container">
+      <Card08PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/08-validate-with-zod" />
+  </section>
+</CardLayout>

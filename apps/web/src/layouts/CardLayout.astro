@@ -1,0 +1,57 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import { cardContext } from '../data/cards';
+import { href } from '../lib/url';
+
+interface Props {
+  title: string;
+  cardNumber: string;
+}
+const { title, cardNumber } = Astro.props;
+const { part, prev, next } = cardContext(cardNumber);
+---
+
+<BaseLayout title={`${title} · Card ${cardNumber}`} active="cookbook">
+  <header class="card-head">
+    <div class="card-head__over">
+      {
+        part && (
+          <span class="label card-head__part">
+            Part {part.part} · {part.title}
+          </span>
+        )
+      }
+      <span class="card-head__no">Card {cardNumber}</span>
+    </div>
+    <h1>{title}</h1>
+  </header>
+
+  <slot />
+
+  <nav class="card-nav" aria-label="Card navigation">
+    {
+      prev ? (
+        <a class="card-nav__link" href={href(`/cards/${prev.num}`)} rel="prev">
+          <span class="card-nav__dir">← Card {prev.num}</span>
+          <span class="card-nav__title">{prev.title}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      next ? (
+        <a
+          class="card-nav__link card-nav__link--next"
+          href={href(`/cards/${next.num}`)}
+          rel="next"
+        >
+          <span class="card-nav__dir">Card {next.num} →</span>
+          <span class="card-nav__title">{next.title}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+  </nav>
+</BaseLayout>

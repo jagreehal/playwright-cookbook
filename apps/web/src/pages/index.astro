@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { PARTS, ALL_CARDS } from '../data/cards';
+import { href } from '../lib/url';
+---
+
+<BaseLayout
+  title="Playwright API Mocking Cookbook"
+  description="A field manual for maintainable, non-flaky Playwright tests — page.route() done right."
+  active="cookbook"
+>
+  <section class="cover">
+    <p class="cover__kicker label">Playwright · Field Manual</p>
+    <h1>Tests that depend on your code, not the internet.</h1>
+    <p class="cover__lede">
+      {ALL_CARDS.length} self-contained patterns for getting API mocking and test
+      conventions right with Playwright. Every card is a complete recipe: prose,
+      a live specimen you can poke at, and a runnable test.
+    </p>
+    <div class="cover__meta">
+      <span class="label"><b>{ALL_CARDS.length}</b> cards</span>
+      <span class="label"><b>{PARTS.length}</b> parts</span>
+      <span class="label"><b>page.route()</b> first</span>
+    </div>
+  </section>
+
+  {
+    PARTS.map((part) => (
+      <section class="part">
+        <div class="part__head">
+          <span class="part__no">Part {part.part}</span>
+          <h2 class="part__title">{part.title}</h2>
+          <p class="part__summary">{part.summary}</p>
+        </div>
+        <ul class="toc">
+          {part.cards.map((card) => (
+            <li class="toc__item">
+              <a class="toc__link" href={href(`/cards/${card.num}`)}>
+                <span class="toc__num">{card.num}</span>
+                <span class="toc__title">{card.title}</span>
+                <span class="toc__arrow" aria-hidden="true">
+                  →
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</BaseLayout>

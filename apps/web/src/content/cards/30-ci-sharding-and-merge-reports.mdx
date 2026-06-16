@@ -1,0 +1,86 @@
+# Card 30: CI Sharding & Merge Reports
+
+## What This Pattern Solves
+
+Real suites need sharding: split tests across N CI machines, each running a subset, then merge the per-shard reports into one. This repo ships a working implementation: a sharded `.github/workflows/playwright.yml` plus a `blob` reporter that only turns on under CI.
+
+## How It Works
+
+1. **Blob reporter** writes each shard's results to a portable file (enabled only on CI).
+2. **`--shard=N/M`** splits tests evenly by filename across the matrix.
+3. **`merge-reports`** combines all the shard blobs into a single HTML report in a follow-up job.
+
+## Code Example
+
+**playwright.config.ts** (CI emits a blob report; the HTML report comes from the merge step):
+```typescript
+const isCI = !!process.env.CI;
+
+export default defineConfig({
+  workers: isCI ? '50%' : undefined,
+  reporter: isCI
+    ? [['list'], ['blob'], ['junit', { outputFile: 'test-results/junit.xml' }]]
+    : [['html']],
+});
+```
+
+**.github/workflows/playwright.yml** — a shard matrix uploads one blob per shard, then a `merge-reports` job downloads them all and merges into HTML:
+```yaml
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report
+
+  merge-reports:
+    if: ${{ !cancelled() }}
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+      - run: pnpm exec playwright merge-reports --reporter html ./all-blob-reports
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report
+```
+
+## Run This Example
+
+```bash
+pnpm test src/30-ci-sharding-and-merge-reports
+npx playwright test --shard=1/4 --reporter=blob
+npx playwright merge-reports --reporter=html ./all-blob-reports
+```
+
+## Key Concepts
+
+- **`--shard=N/M`**: Split into M groups, run group N. The workflow uses a 4-shard matrix.
+- **Blob reporter**: Portable per-shard files designed for merging; on CI the config also emits `list` and `junit`.
+- **`merge-reports`**: Combines downloaded blobs into one HTML report in a dedicated `merge-reports` job.
+- **`workers: '50%'` on CI**: Each shard machine still runs multiple workers within its slice.
+
+## Related Patterns
+
+- **Previous**: Card 29 (Trace Viewer)
+- **Next**: Card 31 (Network HAR)
+- **Complementary**: Card 19 (Auth Storage State)

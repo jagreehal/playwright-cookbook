@@ -1,0 +1,102 @@
+# Card 37: Global Setup & Teardown
+
+## What This Pattern Solves
+
+Card 19 describes auth storage state. This card shows how to run that login once before the whole suite using the modern **setup project** pattern instead of `test.beforeAll`. A `setup` project logs in each role a single time, writes a `storageState` file per role, and specs consume those files with `test.use(\{ storageState \})`. The config wires it via `dependencies: ['setup']`, so the setup project always runs first.
+
+## How It Works
+
+1. **`setup` project** (`src/auth.setup.ts`) matches `*.setup.ts` and logs in each role once, saving `playwright/.auth/<role>.json` and writing a `.setup-done` marker.
+2. **`dependencies: ['setup']`** on the functional projects guarantees the setup project completes before any spec runs.
+3. **`test.use(\{ storageState: 'playwright/.auth/admin.json' \})`** loads a role's saved auth per describe block; omitting it leaves the test unauthenticated (and protected routes redirect to `/login`).
+4. **`.gitignore`** the `playwright/.auth/` directory.
+
+## Code Example
+
+```typescript
+// playwright.config.ts
+export default defineConfig({
+  projects: [
+    // Auth bootstrap: logs in once per role, writes storageState files.
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
+    // Functional suite depends on setup so the auth files exist first.
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
+    },
+  ],
+});
+
+// src/auth.setup.ts
+import * as fs from 'fs';
+import { test as setup, expect } from '@playwright/test';
+import { loginAs } from './e2e-patterns/login/flow';
+
+const AUTH_DIR = 'playwright/.auth';
+
+setup('authenticate as admin', async ({ page }) => {
+  fs.mkdirSync(AUTH_DIR, { recursive: true });
+  await loginAs(page, 'admin', 'adminpass');
+  await expect(page.getByTestId('dashboard-message')).toContainText('admin');
+  await page.context().storageState({ path: `${AUTH_DIR}/admin.json` });
+  fs.writeFileSync(`${AUTH_DIR}/.setup-done`, 'setup-completed');
+});
+
+// a spec consuming a role
+test.describe('admin role', () => {
+  test.use({ storageState: `${AUTH_DIR}/admin.json` });
+
+  test('admin reaches the protected page with no UI login', async ({ page }) => {
+    await page.goto('/protected');
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+  });
+});
+```
+
+## Alternative: globalSetup / globalTeardown
+
+The older config-level lifecycle still works and is documented here for completeness. The setup-project approach above is preferred because it shows in the report, gets traces/retries, and parallelises per role.
+
+```typescript
+// playwright.config.ts
+export default defineConfig({
+  globalSetup: './global-setup.ts',
+  globalTeardown: './global-teardown.ts',
+});
+
+// global-setup.ts — runs once before all tests, manages its own browser
+export default async function globalSetup(config: FullConfig) {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await loginAs(page, 'admin', 'adminpass');
+  await ctx.storageState({ path: 'playwright/.auth/admin.json' });
+  await ctx.close();
+  await browser.close();
+}
+```
+
+## Run This Example
+
+```bash
+pnpm test src/37-global-setup-teardown
+```
+
+## Key Concepts
+
+- **`setup` project + `dependencies: ['setup']`**: Preferred way to run login once before the suite; appears in the report and supports traces/retries.
+- **`test.use(\{ storageState \})`**: Selects a saved role per describe block; omit it for an unauthenticated test.
+- **Marker file**: `playwright/.auth/.setup-done` proves the setup project ran first.
+- **`globalSetup`/`globalTeardown`**: Config-level alternative; runs once and manages its own browser. Receives `FullConfig`.
+
+## Common Mistakes
+
+1. Forgetting `.gitignore` for auth files.
+2. Using `test.beforeAll` to log in per file instead of a shared setup project.
+3. Forgetting `dependencies: ['setup']`, so storageState files don't exist yet.
+
+## Related Patterns
+
+- **Previous**: Card 36 (File Uploads & Downloads)
+- **Complementary**: Card 19 (Auth Storage State), Card 33 (Worker-Scoped Fixtures), Card 20 (API Seeding)

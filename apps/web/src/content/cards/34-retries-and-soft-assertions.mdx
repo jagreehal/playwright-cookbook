@@ -1,0 +1,65 @@
+# Card 34: Retries & Soft Assertions
+
+## What This Pattern Solves
+
+Assertions fail one at a time: the first failure stops the test, so you never learn about other problems until the next CI run. `expect.soft` collects all failures before failing. `expect.poll` and `expect.toPass` retry until a condition is met. `test.fail` and `test.fixme` communicate intent about known-broken tests.
+
+## How It Works
+
+1. **`expect.soft()`**: Runs every soft assertion, collects failures, fails at the end.
+2. **`expect.poll()`**: Re-runs a function (sync or async) at intervals until the expected value or timeout.
+3. **`expect.toPass()`**: Retries an async function until it passes.
+4. **`test.fail()`**: Expected to fail — if it passes, it's a signal the bug is fixed.
+5. **`test.fixme()`**: Marked as skipped (won't run).
+
+## Code Example
+
+```typescript
+// Soft assertions: all three run, failures collected
+await expect.soft(page.getByTestId('name')).toHaveText('Luke');
+await expect.soft(page.getByTestId('height')).toHaveText('172');
+await expect.soft(page.getByTestId('mass')).toHaveText('77');
+
+// Poll an async getter at intervals until it returns the expected value
+await expect
+  .poll(() => page.getByTestId('person-name').innerText(), {
+    timeout: 5000,
+    intervals: [100, 250, 500],
+  })
+  .toBe('Poll Luke');
+
+// Retry an async callback until it passes
+await expect(async () => {
+  await expect(page.getByTestId('person-name')).toHaveText('ToPass Luke');
+}).toPass({ timeout: 5000 });
+
+// Known bug — expected-to-fail, called inside the test body. If it passes
+// unexpectedly the run fails, alerting you the bug is fixed.
+test.fail(true, 'KNOWN BUG: this is a demonstration');
+expect(false).toBe(true);
+```
+
+## Run This Example
+
+```bash
+pnpm test src/34-retries-and-soft-assertions
+```
+
+## Key Concepts
+
+- **`expect.soft()`**: Collects errors, fails at test end.
+- **`expect.poll()`**: Polls a sync or async getter with custom `intervals`.
+- **`expect.toPass()`**: Async retry callback.
+- **`test.fail()`/`test.fixme()`/`test.skip()`**: Intent signalling.
+
+## Common Mistakes
+
+1. `expect.soft` without a final hard check (test may pass silently).
+2. Using `waitForTimeout` instead of `expect.poll`.
+3. Forgetting to remove `test.fail` after fixing the bug.
+
+## Related Patterns
+
+- **Previous**: Card 33 (Worker-Scoped Fixtures)
+- **Next**: Card 35 (Multi-Tab & Multi-Context)
+- **Complementary**: Card 15 (Done Signals), Card 22 (Failure Artifacts)

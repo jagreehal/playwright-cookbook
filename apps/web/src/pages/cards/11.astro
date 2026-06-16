@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card11LoginForm from '../../components/cards/Card11LoginForm.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/11-login-flow.mdx';
+---
+
+<CardLayout title="Login Flow (Forms & Navigation)" cardNumber="11">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 This login form is what the Playwright test interacts with:
+    </p>
+    <div class="demo-container">
+      <Card11LoginForm />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/11-login-flow" />
+  </section>
+</CardLayout>

@@ -1,0 +1,6 @@
+packages:
+  - '.'
+  - 'apps/web'
+allowBuilds:
+  esbuild: false
+  sharp: false

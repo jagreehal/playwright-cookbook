@@ -1,0 +1,63 @@
+# Card 32: Mobile & Emulation
+
+## What This Pattern Solves
+
+You need to test across devices, viewports, color schemes, geolocation, and permissions — without owning a device lab. Playwright's built-in device descriptors and emulation APIs simulate mobile viewports, touch input, geolocation, `prefers-color-scheme`, and browser permissions.
+
+## How It Works
+
+1. **Device descriptors**: `devices['iPhone 13']` provides a complete preset.
+2. **`test.use()`**: Apply device settings to a describe block or single test.
+3. **`context.setGeolocation()`**: Override the browser's geolocation.
+4. **`context.grantPermissions()`**: Pre-grant permissions.
+5. **`page.emulateMedia()`**: Force `colorScheme`, `reducedMotion`, `forcedColors`.
+
+## Code Example
+
+```typescript
+import { test, expect, devices } from '@playwright/test';
+
+const iPhone = devices['iPhone 13'];
+
+// Apply the device's emulation properties to this block.
+test.use({
+  viewport: iPhone.viewport,
+  userAgent: iPhone.userAgent,
+  deviceScaleFactor: iPhone.deviceScaleFactor,
+  isMobile: iPhone.isMobile,
+  hasTouch: iPhone.hasTouch,
+});
+
+test('geolocation', async ({ page, context }) => {
+  await context.grantPermissions(['geolocation']);
+  await context.setGeolocation({ latitude: 51.5074, longitude: -0.1278 });
+});
+
+test('dark mode', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+});
+```
+
+## Run This Example
+
+```bash
+pnpm test src/32-mobile-and-emulation
+```
+
+## Key Concepts
+
+- **`devices['...']`**: Pre-built descriptors for iOS, Android, desktop.
+- **`context.setGeolocation()`**: Override navigator.geolocation.
+- **`context.grantPermissions()`**: Skip permission prompts.
+- **`page.emulateMedia()`**: Emulate CSS media features.
+
+## Common Mistakes
+
+1. Forgetting `context.grantPermissions()` before `setGeolocation()`.
+2. Using `page.emulateMedia()` for viewport (it only changes CSS media).
+
+## Related Patterns
+
+- **Previous**: Card 31 (Network HAR)
+- **Next**: Card 33 (Worker-Scoped Fixtures)
+- **Complementary**: Card 18 (Stability Techniques), Card 30 (CI Sharding)

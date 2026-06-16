@@ -1,0 +1,51 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Playwright: Debug Current Test",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["playwright", "test", "${relativeFile}", "--headed", "--debug"],
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "env": {
+        "PWDEBUG": "1"
+      }
+    },
+    {
+      "name": "Playwright: Debug Current Test (headless)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["playwright", "test", "${relativeFile}", "--debug"],
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Playwright: Run All Tests (headed)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["playwright", "test", "--headed"],
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Playwright: Show Trace",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["playwright", "show-trace", "${input:tracePath}"],
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "tracePath",
+      "type": "promptString",
+      "description": "Path to trace.zip file"
+    }
+  ]
+}

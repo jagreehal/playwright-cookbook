@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card05PersonFetcher from '../../components/cards/Card05PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/05-proxy-to-real-api.mdx';
+---
+
+<CardLayout title="Proxy to Real API" cardNumber="05">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 Test proxies to real API with modifications:
+    </p>
+    <div class="demo-container">
+      <Card05PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/05-proxy-to-real-api" />
+  </section>
+</CardLayout>

@@ -1,0 +1,64 @@
+# Card 28: Component Testing
+
+## What This Pattern Solves
+
+The suite tests full pages, never a component in isolation. When a component has complex internal state or many edge cases, testing it through the full page is slow and makes root-cause harder. This card demonstrates component-level testing using Playwright's page-level primitives: inject a component into the running page and interact with it directly.
+
+## How It Works
+
+1. Navigate to any page to get a live DOM root — the page is a vessel, the component is the subject.
+2. Use `page.evaluate()` to inject the component's HTML, styles, and event handlers into the DOM.
+3. Query the injected component with standard locators.
+4. Interact and assert on its state.
+
+For teams with framework component testing, replace step 2 with `@playwright/experimental-ct-*`.
+
+## Code Example
+
+```typescript
+await page.evaluate(() => {
+  const el = document.createElement('div');
+  el.innerHTML = `
+    <form data-testid="iso-form">
+      <label for="iso-input">Name</label>
+      <input id="iso-input" type="text" />
+      <button type="submit">Submit</button>
+    </form>
+    <output data-testid="iso-output"></output>
+  `;
+  document.body.appendChild(el);
+  el.querySelector('form')!.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = el.querySelector('#iso-input') as HTMLInputElement;
+    document.querySelector('[data-testid="iso-output"]')!.textContent =
+      `Submitted: ${input.value}`;
+  });
+});
+
+await page.getByLabel('Name').fill('Leia');
+await page.getByTestId('iso-submit').click();
+await expect(page.getByTestId('iso-output')).toHaveText('Submitted: Leia');
+```
+
+## Run This Example
+
+```bash
+pnpm test src/28-component-testing
+```
+
+## Prerequisites
+
+- **Card 01**: Basic page navigation and assertions.
+- **Card 13**: Scoped queries and container-first locators.
+
+## Key Concepts
+
+- **Component isolation**: Mount one component, test it — no page routing, no API mocking.
+- **`page.evaluate()` mount**: Inject raw HTML + JS. Works with any framework.
+- **`@playwright/experimental-ct-*`**: First-class framework component mounting.
+
+## Related Patterns
+
+- **Previous**: Card 27 (Visual Regression)
+- **Next**: Card 29 (Trace Viewer)
+- **Complementary**: Card 26 (Full Architecture)

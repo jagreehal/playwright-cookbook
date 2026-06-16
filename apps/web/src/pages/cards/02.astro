@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card02PersonFetcher from '../../components/cards/Card02PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/02-mock-first-api.mdx';
+---
+
+<CardLayout title="Mock Your First API" cardNumber="02">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 This component is what the Playwright test interacts with (test mocks the API):
+    </p>
+    <div class="demo-container">
+      <Card02PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/02-mock-first-api" />
+  </section>
+</CardLayout>

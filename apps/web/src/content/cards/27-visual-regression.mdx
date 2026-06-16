@@ -1,0 +1,102 @@
+# Card 27: Visual Regression with `toHaveScreenshot`
+
+## What This Pattern Solves
+
+Card 18 introduced a single component screenshot, but real suites need more: handling OS-level anti-aliasing differences, masking volatile content, tuning sensitivity with `threshold` and `maxDiffPixels`, and applying shared CSS. This card covers the full `toHaveScreenshot` depth.
+
+## How It Works
+
+1. The `describe` block is tagged `{ tag: '@visual' }` so visual tests can be selected (or excluded) as a group in CI.
+2. A `beforeEach` mocks the API deterministically with `makePerson`, then injects a stylesheet that disables transitions/animations so screenshots are stable.
+3. `PersonPage.open(page, '1', '/cards/18')` loads the page, and `personCardLocator(page, '1')` scopes to the card.
+4. The first test takes an element-level screenshot of the person card.
+5. The second test uses `maxDiffPixels` and `threshold` to tolerate minor rendering differences across machines.
+6. The third test reuses the same golden with a `maxDiffPixels` tolerance.
+
+The update workflow: delete the stale snapshot (or run with `--update-snapshots`) and Playwright writes a new golden image on the next run.
+
+## Code Example
+
+```typescript
+import { test, expect } from '@playwright/test';
+import { personCardLocator } from '../e2e-patterns/person/locators';
+import { PersonPage } from '../e2e-patterns/person/PersonPage';
+import { makePerson } from '../swapi/builders';
+
+test.describe(
+  '27-visual-regression: toHaveScreenshot depth: masking, threshold, stylePath',
+  { tag: '@visual' },
+  () => {
+    test.beforeEach(async ({ page }) => {
+      await page.route('**/swapi.dev/api/people/1/**', (route) =>
+        route.fulfill({
+          json: makePerson({
+            name: 'Luke Skywalker',
+            height: '172',
+            mass: '77',
+            url: 'https://swapi.dev/api/people/1/',
+          }),
+        }),
+      );
+      await page.addInitScript(() => {
+        const css =
+          '* { transition: none !important; animation: none !important; }';
+        const style = document.createElement('style');
+        style.textContent = css;
+        (document.head ?? document.documentElement).appendChild(style);
+      });
+    });
+
+    test('element-level screenshot of the person card', async ({ page }) => {
+      await PersonPage.open(page, '1', '/cards/18');
+      const card = personCardLocator(page, '1');
+      await expect(card).toBeVisible();
+      await expect(card).toHaveScreenshot('person-card-element.png');
+    });
+
+    test('lenient comparison with maxDiffPixels and threshold', async ({
+      page,
+    }) => {
+      await PersonPage.open(page, '1', '/cards/18');
+      const card = personCardLocator(page, '1');
+      await expect(card).toBeVisible();
+      await expect(card).toHaveScreenshot('person-card-lenient.png', {
+        maxDiffPixels: 100, // tolerate up to 100 differing pixels
+        threshold: 0.3, // each pixel can differ by up to 30%
+      });
+    });
+  },
+);
+```
+
+## Run This Example
+
+```bash
+pnpm test src/27-visual-regression
+pnpm test src/27-visual-regression --update-snapshots
+```
+
+## Prerequisites
+
+- **Card 18**: First component screenshot (`toHaveScreenshot` basics).
+- **Card 12/26**: PersonPage and page object patterns.
+
+## Key Concepts
+
+- **maxDiffPixels**: Absolute number of pixels allowed to differ.
+- **threshold**: Per-pixel tolerance (0-1). 0.1 means 10% allowed difference.
+- **mask**: Array of `{ x, y, width, height }` rectangles. Content inside is ignored.
+- **stylePath**: Path to a CSS file injected before the screenshot.
+- **`--update-snapshots`**: CLI flag that overwrites golden images.
+
+## Common Mistakes
+
+1. Not masking volatile content (timestamps, random data) — they fail every run.
+2. Committing stale snapshots without reviewing the diff.
+3. Running visual tests on a different OS than CI (use `threshold`).
+
+## Related Patterns
+
+- **Previous**: Card 18 (Stability Techniques)
+- **Next**: Card 28 (Component Testing)
+- **Complementary**: Card 26 (Full Architecture)

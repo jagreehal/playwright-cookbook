@@ -1,0 +1,68 @@
+# Card 35: Multi-Tab & Multi-Context
+
+## What This Pattern Solves
+
+Real apps spawn popups, open new tabs, and support multiple simultaneous user sessions. Testing these flows requires managing multiple pages and browser contexts.
+
+## How It Works
+
+1. **`context.newPage()`**: Create a new tab in the same context (shares storage).
+2. **`context.waitForEvent('page')`**: Capture a popup/new tab triggered by user action.
+3. **`browser.newContext()`**: Create an isolated context with separate storage, cookies, permissions.
+4. **`context.pages()`**: Get all open pages in a context.
+
+## Code Example
+
+```typescript
+// Popup capture: register the waiter before the click that triggers it.
+const [popup] = await Promise.all([
+  context.waitForEvent('page'),
+  page.getByTestId('open-popup-btn').click(),
+]);
+
+// Multi-context: two users with separate auth, logged in via the UI.
+const adminContext = await browser.newContext();
+const userContext = await browser.newContext();
+
+const adminPage = await adminContext.newPage();
+await adminPage.goto('/login');
+await adminPage.getByLabel('Username').fill('admin');
+await adminPage.getByLabel('Password').fill('adminpass');
+await Promise.all([
+  adminPage.waitForURL(/protected/),
+  adminPage.getByRole('button', { name: 'Log in' }).click(),
+]);
+
+const userPage = await userContext.newPage();
+await userPage.goto('/login');
+await userPage.getByLabel('Username').fill('testuser');
+await userPage.getByLabel('Password').fill('password');
+await Promise.all([
+  userPage.waitForURL(/protected/),
+  userPage.getByRole('button', { name: 'Log in' }).click(),
+]);
+```
+
+## Run This Example
+
+```bash
+pnpm test src/35-multi-tab-and-multi-context
+```
+
+## Key Concepts
+
+- **Page vs Context vs Browser**: Pages in same context share storage. Different contexts are fully isolated.
+- **`context.waitForEvent('page')`**: Must register before the trigger action.
+- **`browser.newContext()`**: Fresh, isolated context per user role.
+
+## Common Mistakes
+
+1. Missing `waitForEvent` before the trigger (test hangs).
+2. Using `newPage()` when you need `newContext()` for auth isolation.
+3. Not closing extra pages/contexts (memory leaks).
+
+## Related Patterns
+
+- **Previous**: Card 34 (Retries & Soft Assertions)
+- **Next**: Card 36 (File Uploads & Downloads)
+- **Complementary**: Card 19 (Auth Storage State), Card 32 (Mobile & Emulation)

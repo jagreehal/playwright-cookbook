@@ -1,0 +1,17 @@
+{
+  "name": "playwright-cookbook-web",
+  "type": "module",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Docs and demo app for Playwright Cookbook",
+  "scripts": {
+    "dev": "astro dev --port 9321",
+    "build": "astro build",
+    "preview": "astro preview --port 9321"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "4.3.13",
+    "@astrojs/node": "9.5.5",
+    "astro": "5.17.2"
+  }
+}

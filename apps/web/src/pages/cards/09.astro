@@ -1,0 +1,27 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card09PersonFetcher from '../../components/cards/Card09PersonFetcher.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/09-generate-data-faker.mdx';
+---
+
+<CardLayout title="Generate Data with Faker" cardNumber="09">
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 Test generates mock data with Faker builders:
+    </p>
+    <div class="demo-container">
+      <Card09PersonFetcher />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/09-generate-data-faker" />
+  </section>
+</CardLayout>
