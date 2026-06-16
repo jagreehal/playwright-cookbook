@@ -47,6 +47,10 @@ test.describe('18-stability-techniques: Disable animations, strict locators, scr
     await PersonPage.open(page, '1', '/cards/18');
     const card = personCardLocator(page, '1');
     await expect(card).toBeVisible();
-    await expect(card).toHaveScreenshot('person-card.png');
+    await expect(card).toHaveScreenshot('person-card.png', {
+      animations: 'disabled',
+      caret: 'hide',
+      scale: 'css',
+    });
   });
 });

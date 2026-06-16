@@ -3,6 +3,12 @@ import { personCardLocator } from '../e2e-patterns/person/locators';
 import { PersonPage } from '../e2e-patterns/person/PersonPage';
 import { makePerson } from '../swapi/builders';
 
+const screenshotOptions = {
+  animations: 'disabled' as const,
+  caret: 'hide' as const,
+  scale: 'css' as const,
+};
+
 test.describe('27-visual-regression: toHaveScreenshot depth: masking, threshold, stylePath', { tag: '@visual' }, () => {
   test.beforeEach(async ({ page }) => {
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
@@ -35,7 +41,7 @@ test.describe('27-visual-regression: toHaveScreenshot depth: masking, threshold,
     await PersonPage.open(page, '1', '/cards/18');
     const card = personCardLocator(page, '1');
     await expect(card).toBeVisible();
-    await expect(card).toHaveScreenshot('person-card-element.png');
+    await expect(card).toHaveScreenshot('person-card-element.png', screenshotOptions);
   });
 
   test('screenshot with maxDiffPixels and threshold for lenient comparison', async ({ page }) => {
@@ -43,6 +49,7 @@ test.describe('27-visual-regression: toHaveScreenshot depth: masking, threshold,
     const card = personCardLocator(page, '1');
     await expect(card).toBeVisible();
     await expect(card).toHaveScreenshot('person-card-lenient.png', {
+      ...screenshotOptions,
       maxDiffPixels: 100,
       threshold: 0.3,
     });
@@ -55,6 +62,9 @@ test.describe('27-visual-regression: toHaveScreenshot depth: masking, threshold,
 
     // Compares against the same committed golden as test 1, but allows up to
     // 100 differing pixels so minor rendering variance does not fail the run.
-    await expect(card).toHaveScreenshot('person-card-element.png', { maxDiffPixels: 100 });
+    await expect(card).toHaveScreenshot('person-card-element.png', {
+      ...screenshotOptions,
+      maxDiffPixels: 100,
+    });
   });
 });
