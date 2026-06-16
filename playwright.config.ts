@@ -11,7 +11,16 @@ export default defineConfig({
   workers: isCI ? '50%' : undefined,
   // Strict global/expect/action timeouts surface races fast (playwright-config).
   timeout: 60_000,
-  expect: { timeout: 7_500 },
+  expect: {
+    timeout: 7_500,
+    // Cross-runner font antialiasing shifts a handful of edge pixels (~38px on
+    // these small cards) even with deterministic data and pinned rendering.
+    // Tolerate a tiny pixel-diff ratio so committed baselines survive runner
+    // image bumps, while structural regressions (thousands of pixels) still
+    // fail. Per-test maxDiffPixels overrides remain stricter where set, since
+    // the smaller of the two limits wins (playwright-visual-regression).
+    toHaveScreenshot: { maxDiffPixelRatio: 0.01 },
+  },
   // On CI emit a blob report to merge across shards, plus junit for the CI UI;
   // the HTML report is produced by the merge step (playwright-ci).
   reporter: isCI

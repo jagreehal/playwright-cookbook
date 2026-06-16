@@ -1,9 +1,16 @@
 name: Playwright Tests
 
 on:
+  # Run on every branch push (pre-PR feedback) and on PRs (covers fork
+  # contributions, which push events from forks cannot trigger).
   push:
-    branches: [main]
   pull_request:
+
+# Cancel an in-progress run when new commits land on the same ref, so rapid
+# re-pushes don't queue redundant runs.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -14,6 +21,11 @@ jobs:
   test:
     name: Test (shard ${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
+    # Same-repo branches are covered by the push event, so skip the duplicate
+    # pull_request run. Fork PRs only arrive via pull_request, so still run them.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       fail-fast: false
       matrix:
@@ -38,7 +50,9 @@ jobs:
 
   merge-reports:
     name: Merge reports
-    if: ${{ !cancelled() }}
+    # Run unless cancelled, but skip when the test job was skipped (the
+    # duplicate same-repo pull_request run) so we don't try to merge nothing.
+    if: ${{ !cancelled() && needs.test.result != 'skipped' }}
     needs: [test]
     runs-on: ubuntu-latest
     steps:
