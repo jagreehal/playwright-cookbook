@@ -18,6 +18,15 @@ export default tseslint.config(
       'no-empty-pattern': 'off',
       // Allow page.pause() for debugging; flag as warning, not error
       'playwright/no-page-pause': 'warn',
+      // Playwright discourages networkidle — wait on a specific response or assertion.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Literal[value="networkidle"]',
+          message:
+            'Never use networkidle — wait on waitForResponse or a web-first assertion.',
+        },
+      ],
     },
   },
 

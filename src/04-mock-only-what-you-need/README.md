@@ -137,5 +137,5 @@ sequenceDiagram
 - **Previous**: Card 03 (Full Mock Payload) covers writing complete mocks.
 - **Next**: Card 05 (Proxy to Real API) takes the opposite approach, allowing real requests and patching results.
 - **Advanced**: Card 16 (Debug Unhandled Requests) for the workflow when the fallback catches requests.
-- **Complementary**: Card 15 (Done Signals) for waiting on network idle.
+- **Complementary**: Card 15 (Done Signals) for `waitForResponse` and web-first assertions instead of vague load waits.
 - **Compare**: Card 02 (Basic Mocking) has no strictness, so requests can leak to the network.

@@ -246,6 +246,8 @@ If the relationship varies (this header sometimes has a `UserMenu`, sometimes do
 | Test data | Components encode UI, not domain data |
 | Other components' locators | Components only know about their own root |
 
+A state query returns a value (`Promise<string | null>`), not a `Locator`, so it can't auto-retry on its own. When you only need to *assert* the value, prefer exposing a `Locator` and using a web-first matcher — `await expect(sidebar.activeLink).toHaveText('Settings')`. When the spec genuinely needs the value (branching, logging), keep the query but assert it with `expect.poll(() => sidebar.activeLinkName()).toBe('Settings')` so it retries. Never `await expect(query()).resolves.toBe(...)` — that resolves once and reintroduces the timing flake web-first assertions exist to remove.
+
 ## Anti-Patterns
 
 | Anti-pattern | Failure mode | Fix |
