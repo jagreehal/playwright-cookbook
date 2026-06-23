@@ -176,7 +176,7 @@ Test passes locally, fails on CI. The environment is different: slower CPUs, les
 | Element not found | Slower CI CPU, animations not yet finished | Disable animations, longer assertion timeouts only as a last resort |
 | Timeout exceeded | Insufficient `expect.timeout` for slower CI | Bump per-assertion if genuinely needed; first investigate why CI is slower |
 | Screenshot diff fails on CI | Different OS/font rendering | Run snapshots in containerised CI to match local; pin docker image |
-| Flaky `networkidle` waits | More background analytics/feature-flag traffic | Replace with specific `waitForResponse` or assertion |
+| Flaky `networkidle` waits | More background analytics/feature-flag traffic | Never use `networkidle` (the Playwright team discourages it as racy) — wait on a specific `waitForResponse` or a web-first assertion |
 | Tests pass on rerun | Race in setup; first run loses, retry wins | Move setup into fixture; ensure web-first assertions everywhere |
 
 Reproduce CI conditions locally:

@@ -1,5 +1,7 @@
 # Playwright Cookbook
 
+[![skills.sh](https://skills.sh/b/jagreehal/playwright-cookbook)](https://skills.sh/jagreehal/playwright-cookbook)
+
 A workshop-style guide to testing with Playwright, from your first browser test to a composed architecture for large suites. Every card ships with runnable code and a README.
 
 ## Why This Cookbook?

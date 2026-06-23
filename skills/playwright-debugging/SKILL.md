@@ -36,7 +36,7 @@ npx playwright show-trace test-results/**/trace.zip
 - Timeout waiting for visible element -> wrong locator or premature assert -> move to semantic locator + `expect(locator)`.
 - Passes serially, fails parallel -> shared resource collision -> worker-indexed test data.
 - Passes on retry only -> race condition -> remove snapshot reads / sleeps, use web-first assertions.
-- Fails only CI -> env differences -> pin viewport/timezone/locale, eliminate `networkidle` assumptions.
+- Fails only CI -> env differences -> pin viewport/timezone/locale; never rely on `networkidle` (racy everywhere, worse on CI) — wait on a specific response or web-first assertion.
 - Random 5xx/429 -> upstream dependency -> mock route or split into integration-tagged tests.
 
 ## Anti-Patterns
