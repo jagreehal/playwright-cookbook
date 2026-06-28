@@ -1,0 +1,31 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card39TestidStrategy from '../../components/cards/Card39TestidStrategy.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/39-testid-strategy.mdx';
+
+const cardNumber = '39';
+const cardTitle = 'Test ID Strategy';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 Every surface is built twice. The Playwright test runs the same query
+      against the good and the bad version:
+    </p>
+    <div class="demo-container">
+      <Card39TestidStrategy />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/39-testid-strategy" />
+  </section>
+</CardLayout>

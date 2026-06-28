@@ -89,6 +89,7 @@ export const PARTS: CardPart[] = [
       { num: '36', title: 'File Uploads & Downloads' },
       { num: '37', title: 'Global Setup & Teardown' },
       { num: '38', title: 'Executable Stories' },
+      { num: '39', title: 'Test ID Strategy' },
     ],
   },
 ];

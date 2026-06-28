@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import node from '@astrojs/node';
+import react from '@astrojs/react';
 
 // PAGES=true → pure-static build for GitHub Pages (no server adapter, base path).
 // Unset → local dev / Playwright tests: node adapter + dynamic API routes, root base.
@@ -40,7 +41,7 @@ export default defineConfig({
   site: SITE,
   base: PAGES ? BASE : undefined,
   ...(PAGES ? {} : { adapter: node({ mode: 'standalone' }) }),
-  integrations: [mdx()],
+  integrations: [mdx(), react()],
   // The dev-only toolbar floats at the bottom of the page and intercepts
   // pointer events on elements rendered there (breaks click-driven tests).
   devToolbar: { enabled: false },

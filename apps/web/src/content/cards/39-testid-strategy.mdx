@@ -1,0 +1,50 @@
+# Card 39: Test ID Strategy
+
+## What This Pattern Solves
+
+`getByTestId` ranks last in the locator priority, but "last" is not "never". The hard part is the judgment call: in the cases a reviewer actually argues about, is a `data-testid` the default someone reached for too early, or the only honest handle left? This card settles that by building every surface twice — once semantic, once test-id-only — and running the same query against both. A role or label query that passes against the good markup and finds nothing in the bad one is doing two jobs at once: locating the element and proving a real user could reach it too.
+
+A test id is a fallback for the **test contract**, not a licence to skip a role, a label, or keyboard support. Before you add one, ask: would you ship this attribute to a user if no test existed? A real accessible name passes. A test id is invisible to the accessibility tree, so it costs the user nothing. The trap is the middle — an `aria-label` added only so a test can grab an element, which ships to screen-reader users as audible noise and is worse than a test id.
+
+## How It Works
+
+1. **When a test id is the only solution.** An optional wrapper with no role and only optional text inside; a third-party widget that paints into a canvas or closed shadow root; a decorative element announced elsewhere. In these, no semantic handle exists, so a wrapper test id is the honest reach.
+2. **When the markup is one change from reachable.** A nameless third-party combobox gains a name from a `<label>` on the wrapper you own; a section gains a name from `aria-labelledby` to its heading; a `<div onClick>` becomes a `<button>` that a keyboard can reach.
+3. **The negative test that proves nothing.** Inverting a text query does not prove a conditional wrapper is gone — with the text absent, it cannot tell an empty-but-present box from an absent one. Give the element a role and `queryByRole`, or assert it by test id.
+4. **Unique ids per instance.** A fixed `id` for `htmlFor`/`aria-labelledby` cross-wires both labels to the first element when the component renders twice. React's `useId()` generates a unique id per instance; in any framework the rule is one id per instance.
+
+## Code Example
+
+```typescript
+import { expect, test } from '@playwright/test';
+
+// aria-label added only for a test outranks the visible heading in the a11y
+// tree, so the region is announced by the slug, not "Customer reviews".
+test('aria-label only for tests clobbers the heading', async ({ page }) => {
+  await page.setContent(`
+    <section aria-label="reviews-section">
+      <h2>Customer reviews</h2>
+    </section>
+  `);
+  await expect(page.getByRole('heading', { name: 'Customer reviews' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Customer reviews' })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'reviews-section' })).toBeVisible();
+});
+
+// Two instances sharing a fixed id cross-wire both labels to the first input.
+test('a fixed id collides; unique ids (useId) do not', async ({ page }) => {
+  await page.goto('/cards/39');
+  const fixed = page.getByRole('region', { name: 'Search ids (fixed)' });
+  await expect(fixed.getByRole('searchbox', { name: 'Search products' })).toHaveCount(1);
+
+  const unique = page.getByRole('region', { name: 'Search ids (unique)' });
+  await expect(unique.getByRole('searchbox', { name: 'Search products' })).toHaveCount(2);
+});
+```
+
+The live demo below renders each good/bad pair. The Playwright spec scopes to a pair by its region name, then runs the query that passes against one and fails against the other.
+
+## When to Use
+
+- In review, when judging whether a `data-testid` or an `aria-label` is justified.
+- As the companion to the `playwright-testid-strategy` and `playwright-locators` skills.

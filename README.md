@@ -19,7 +19,7 @@ The mocking cards (02-10) use `page.route()` and `context.route()` to intercept 
 
 [![skills.sh](https://skills.sh/b/jagreehal/playwright-cookbook)](https://skills.sh/jagreehal/playwright-cookbook)
 
-This cookbook ships the patterns as **agent skills** — reusable capabilities that give your AI agent procedural knowledge for writing maintainable Playwright suites. The 19 skills under [`skills/`](./skills) cover architecture, locators, fixtures, network mocking, auth, reliability, visual regression, CI, executable stories, and more. Think of them as plugins that teach your agent the conventions used throughout these cards.
+This cookbook ships the patterns as **agent skills** — reusable capabilities that give your AI agent procedural knowledge for writing maintainable Playwright suites. The 20 skills under [`skills/`](./skills) cover architecture, locators, test-id strategy, fixtures, network mocking, auth, reliability, visual regression, CI, executable stories, and more. Think of them as plugins that teach your agent the conventions used throughout these cards.
 
 ### Install
 

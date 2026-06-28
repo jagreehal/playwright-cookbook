@@ -1,0 +1,142 @@
+---
+// Live demo for Card 39 — every surface built twice, good vs bad, so the same
+// query can be run against both. The Playwright spec scopes by the region names
+// below. Most blocks are static Astro markup; the last one is a real React
+// island where useId() generates a unique id per instance.
+import SearchPairReact from './SearchPairReact.tsx';
+---
+
+<div class="card-39-demo">
+  <section aria-label="aria-label clobbers heading (bad)">
+    <h3>aria-label only for tests (bad)</h3>
+    <section aria-label="reviews-section" class="box">
+      <h4>Customer reviews</h4>
+      <p>3 reviews</p>
+    </section>
+  </section>
+
+  <section aria-label="heading is the name (good)">
+    <h3>aria-labelledby to the heading (good)</h3>
+    <section aria-labelledby="reviews-heading" class="box">
+      <h4 id="reviews-heading">Customer reviews</h4>
+      <p>3 reviews</p>
+    </section>
+  </section>
+
+  <section aria-label="promo buggy empty box (bad)">
+    <h3>Conditional wrapper, no message — the empty box bug</h3>
+    <!-- always mounts, even with no message: a text inversion misses this -->
+    <div data-testid="promo-ribbon" class="box"></div>
+  </section>
+
+  <section aria-label="promo role status (good)">
+    <h3>Same announcement with role="status" (good)</h3>
+    <div role="status" class="box">50% off today</div>
+  </section>
+
+  <section aria-label="canvas widget fallback">
+    <h3>Canvas widget — no role, test id is the only handle</h3>
+    <div data-testid="booking-date-field" class="box">
+      <span>Choose date</span>
+      <canvas width="160" height="20" aria-hidden="true"></canvas>
+    </div>
+  </section>
+
+  <section aria-label="combobox named from wrapper (good)">
+    <h3>Third-party combobox named from your wrapper (good)</h3>
+    <label for="booking-date">Choose date</label>
+    <input id="booking-date" role="combobox" aria-expanded="false" readonly placeholder="YYYY-MM-DD" />
+  </section>
+
+  <section aria-label="keyboard real button (good)">
+    <h3>Real button — in the tab order (good)</h3>
+    <input aria-label="Email" type="email" />
+    <button type="submit">Sign in</button>
+  </section>
+
+  <section aria-label="keyboard div button (bad)">
+    <h3>div onClick — skipped by Tab (bad)</h3>
+    <input aria-label="Email (bad)" type="email" />
+    <div class="fake-button">Sign in</div>
+  </section>
+
+  <section aria-label="search placeholder only (bad)">
+    <h3>Placeholder doing a label's job (bad)</h3>
+    <input type="search" placeholder="Search products" />
+  </section>
+
+  <section aria-label="search labelled (good)">
+    <h3>A real, visually-hidden label (good)</h3>
+    <label for="product-search" class="sr-only">Search products</label>
+    <input id="product-search" type="search" placeholder="Try 'wireless headphones'" />
+  </section>
+
+  <section aria-label="Search ids (fixed)">
+    <h3>Two instances, one fixed id — labels collide (bad)</h3>
+    <!-- Both labels point at the same id, so both name the first input. The
+         second box loses its name. -->
+    <label for="dup-search" class="sr-only">Search products</label>
+    <input id="dup-search" type="search" />
+    <label for="dup-search" class="sr-only">Search products</label>
+    <input id="dup-search" type="search" />
+  </section>
+
+  <section aria-label="Search ids (unique)">
+    <h3>Two instances, unique ids — useId keeps each wired (good)</h3>
+    <label for="search-a" class="sr-only">Search products</label>
+    <input id="search-a" type="search" />
+    <label for="search-b" class="sr-only">Search products</label>
+    <input id="search-b" type="search" />
+  </section>
+
+  <section aria-label="Search ids (React useId)">
+    <h3>React island — useId() generates the unique id per instance (good)</h3>
+    <SearchPairReact client:load />
+  </section>
+</div>
+
+<style>
+  .card-39-demo {
+    font-family: system-ui, sans-serif;
+    display: grid;
+    gap: 1.25rem;
+  }
+  .card-39-demo h3 {
+    font-size: 0.95rem;
+    margin: 0 0 0.4rem;
+  }
+  .card-39-demo h4 {
+    margin: 0 0 0.25rem;
+  }
+  .box {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 0.6rem;
+    min-height: 1.5rem;
+  }
+  .fake-button {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    background: #0066cc;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  input {
+    padding: 0.4rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+</style>
