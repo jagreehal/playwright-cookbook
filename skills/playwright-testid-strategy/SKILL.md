@@ -67,6 +67,8 @@ If you do add one, name it for the business concept in kebab-case: `checkout-pri
 ## Cross-References
 
 - The locator priority this skill sits beneath: `playwright-locators`.
+- The same verdict for components built on a library: `playwright-shadcn`, where the primitive has a role but the name is still your code.
+- The localized version of the copy-churn question: `playwright-i18n`, where the translated name is the contract and a test id is the fallback.
 - Centralizing selectors so a test id can change without touching specs: `playwright-page-objects` and `playwright-components`.
 - Asserting presence and absence with web-first matchers: `playwright-assertions`.
 - Scanning for the accessibility gaps a test-id-only suite hides: `src/17-accessibility-axe`.

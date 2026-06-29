@@ -1,0 +1,10 @@
+{
+  "save": "Save",
+  "addToBasket": "Add to basket",
+  "checkout": "Checkout securely",
+  "search": {
+    "label": "Search products",
+    "placeholder": "Try 'wireless headphones'"
+  },
+  "greeting": "Welcome back, {{name}}"
+}

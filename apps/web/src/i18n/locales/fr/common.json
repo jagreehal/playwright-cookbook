@@ -1,0 +1,10 @@
+{
+  "save": "Enregistrer",
+  "addToBasket": "Ajouter au panier",
+  "checkout": "Terminer l'achat en sécurité",
+  "search": {
+    "label": "Rechercher des produits",
+    "placeholder": "Essayez 'casque sans fil'"
+  },
+  "greeting": "Bon retour, {{name}}"
+}

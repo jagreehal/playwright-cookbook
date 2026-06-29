@@ -1,0 +1,10 @@
+---
+// Live demo for Card 40 — shadcn on base (@base-ui/react), every surface built
+// twice, good vs bad, so the same query runs against both. The whole demo is a
+// single React island: base-ui Select, Dialog, and Toast need client JS for
+// their open/announce behaviour, and the Toast provider has to wrap the surfaces
+// that raise toasts. The Playwright spec scopes by the region names inside.
+import Card40Shadcn from './Card40Shadcn.tsx';
+---
+
+<Card40Shadcn client:load />

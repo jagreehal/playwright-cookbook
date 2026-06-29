@@ -1,0 +1,32 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import Card41I18nComponents from '../../components/cards/Card41I18nComponents.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/41-i18n-typesafe.mdx';
+
+const cardNumber = '41';
+const cardTitle = 'Type-Safe i18n';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 A localized storefront with a language switch. Every string flows through
+      a type-safe <code>t()</code>. The Playwright test selects controls by their
+      translated name, from the same JSON the app uses:
+    </p>
+    <div class="demo-container">
+      <Card41I18nComponents />
+    </div>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/41-i18n-typesafe" />
+  </section>
+</CardLayout>

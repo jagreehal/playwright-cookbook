@@ -11,7 +11,8 @@
     "test:debug": "PWDEBUG=1 playwright test",
     "test:record": "RECORD_FIXTURES=1 playwright test",
     "dev:web": "pnpm --filter playwright-cookbook-web dev",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "typecheck": "pnpm --filter playwright-cookbook-web typecheck:i18n"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.3",

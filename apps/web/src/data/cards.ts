@@ -90,6 +90,8 @@ export const PARTS: CardPart[] = [
       { num: '37', title: 'Global Setup & Teardown' },
       { num: '38', title: 'Executable Stories' },
       { num: '39', title: 'Test ID Strategy' },
+      { num: '40', title: 'shadcn Components' },
+      { num: '41', title: 'Type-Safe i18n' },
     ],
   },
 ];

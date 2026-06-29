@@ -1,0 +1,19 @@
+# Card 41: Type-Safe i18n
+
+## What This Pattern Solves
+
+Localization breaks two things at once: the test that hardcodes "Checkout securely" and the `t('chekout')` typo that ships an empty string. This card fixes both. The app uses `i18next` with `react-i18next`, typed so a missing key is a compile error, and the Playwright test selects controls by their translated name read from the same JSON the app renders.
+
+A test id would dodge the copy churn, but it also stops proving the right language reached the screen. The honest contract is the translated name itself, pulled from one source.
+
+## How It Works
+
+1. **The setup is type-safe because the JSON is imported, not fetched.** `i18n.ts` imports the default-language namespaces, and `i18next.d.ts` feeds their shape into `CustomTypeOptions`. Now `t('save')` compiles, `t('xxxx')` is a type error, and `t('navigation:sidebar.home')` is checked against the navigation namespace. A focused `tsc` project (`tsconfig.i18n.json`) runs in CI, so a bad key fails the build rather than reaching a user.
+2. **The test and the app share one source.** The spec imports the same `common.json` and `fr/common.json` the app uses, then selects by `getByRole('button', { name: en.checkout })`. Change the copy in the JSON and both the screen and the selector move together. No string is duplicated into the test.
+3. **The language switch proves the contract holds across locales.** Click "Français", and the same checkout button is now reachable by `fr.checkout`. The control did not change. Its name did, and the test follows the name through the translation source.
+
+## When To Use
+
+- When a localized control needs a stable test contract and you are weighing a test id against the translated name.
+- When `t()` typos slip through review because nothing checks the keys.
+- Alongside `playwright-locators` for the selector priority and `playwright-testid-strategy` for when localized copy earns a test id instead.
