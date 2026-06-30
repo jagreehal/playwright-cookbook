@@ -1,0 +1,21 @@
+# Card 40: shadcn (base-ui) Components
+
+## What This Pattern Solves
+
+Your team ships shadcn/ui on base (`@base-ui/react`). Someone argues that the library "handles accessibility," so a `data-testid` on a Select or a Toast is harmless. The primitives are accessible. The accessible name is your code, and a test id passes whether you wired the name or not.
+
+So the failure mode shifts. Plain-HTML bad markup gives you div soup with no role and no keyboard. shadcn bad markup gives you a correct primitive with a missing name. The keyboard works. The role exists. The named query still fails, and a test id hides the gap.
+
+## How It Works
+
+Every surface on this page renders twice. The good version carries the name the application owes it. The bad version drops the name and leans on a `data-testid`. The Playwright spec runs the same query against both.
+
+1. **The named role beats the role type.** A shadcn icon `Button` with no `aria-label` is still a real button, so `getByRole('button')` finds it. Add the name to the query, `getByRole('button', { name: 'Delete item' })`, and it fails until your team supplies the label. Test for named roles, not role types.
+2. **Labels are application code.** A login form built from `Input` and `Button` keeps Tab and Enter working, because shadcn ships real elements. `getByLabel` finds nothing until you wire a `FieldLabel`. A Select trigger is a real `combobox`, but it carries the field name only when you associate a label.
+3. **Overlays portal to the body.** A Select popup, a Dialog, and a Toast render at the end of `<body>`, outside the field or region they belong to. A query scoped to the demo region comes back empty, and a page-level query finds them. base-ui mounts toasts in a `region` landmark named "Notifications", with each toast a `dialog` named by its title.
+
+## When To Use
+
+- When a review treats "we use shadcn" as proof that accessibility is covered.
+- When a region-scoped query for a Select option, a Dialog, or a Toast comes back empty and you need to know why.
+- As the runnable companion to the `playwright-shadcn` skill, beneath `playwright-locators` and `playwright-testid-strategy`.

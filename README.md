@@ -19,7 +19,7 @@ The mocking cards (02-10) use `page.route()` and `context.route()` to intercept 
 
 [![skills.sh](https://skills.sh/b/jagreehal/playwright-cookbook)](https://skills.sh/jagreehal/playwright-cookbook)
 
-This cookbook ships the patterns as **agent skills** — reusable capabilities that give your AI agent procedural knowledge for writing maintainable Playwright suites. The 20 skills under [`skills/`](./skills) cover architecture, locators, test-id strategy, fixtures, network mocking, auth, reliability, visual regression, CI, executable stories, and more. Think of them as plugins that teach your agent the conventions used throughout these cards.
+This cookbook ships the patterns as **agent skills** — reusable capabilities that give your AI agent procedural knowledge for writing maintainable Playwright suites. The 22 skills under [`skills/`](./skills) cover architecture, locators, test-id strategy, shadcn (base-ui) components, type-safe i18n, fixtures, network mocking, auth, reliability, visual regression, CI, executable stories, and more. Think of them as plugins that teach your agent the conventions used throughout these cards.
 
 ### Install
 
@@ -243,6 +243,9 @@ pnpm lint --fix    # Auto-fix fixable issues
 | [36-file-uploads-downloads](./src/36-file-uploads-downloads/README.md) | File uploads, downloads, clipboard | `setInputFiles`, `waitForEvent('download')`, clipboard API |
 | [37-global-setup-teardown](./src/37-global-setup-teardown/README.md) | Config-level setup and teardown | `globalSetup`, `globalTeardown`, `projects[].storageState` |
 | [38-executable-stories](./src/38-executable-stories/README.md) | BDD-style living docs generated from tests | `story.init(testInfo)`, `given`/`when`/`then`, executable-stories reporter |
+| [39-testid-strategy](./src/39-testid-strategy/README.md) | When a test id earns its place vs hides a missing role | Build-it-twice, `aria-labelledby` vs slug labels, conditional wrappers, `useId()` |
+| [40-shadcn-components](./src/40-shadcn-components/README.md) | Testing shadcn (base-ui) components, isolated + rendered | Named `combobox`/`option`, `Notifications` region, portal scoping, named-role vs test id, hydration-safe interaction |
+| [41-i18n-typesafe](./src/41-i18n-typesafe/README.md) | Type-safe i18next, tested by the translated name | `CustomTypeOptions`, `tsc` gate, select by shared translation source, language switch, JSON import attributes |
 
 ## Quick Reference
 

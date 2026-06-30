@@ -16,6 +16,24 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  # Gate the type-safe i18n setup: a t() key that is not in the locale JSON, or
+  # a bad-key directive that stops erroring, fails this check (card 41).
+  typecheck:
+    name: Typecheck (i18n)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck i18n
+        run: pnpm typecheck
+
   # Shard the suite across runners. Each shard emits a blob report; a final job
   # merges the blobs into one HTML report (playwright-ci).
   test:

@@ -7,18 +7,29 @@
   "scripts": {
     "dev": "astro dev --port 9321",
     "build": "astro build",
-    "preview": "astro preview --port 9321"
+    "preview": "astro preview --port 9321",
+    "typecheck:i18n": "tsc -p tsconfig.i18n.json && node --experimental-strip-types src/i18n/locale-parity.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "4.3.13",
     "@astrojs/node": "9.5.5",
     "@astrojs/react": "^4.4.2",
+    "@base-ui/react": "1.6.0",
     "astro": "5.17.2",
+    "class-variance-authority": "0.7.1",
+    "cnfast": "0.0.8",
+    "i18next": "26.3.1",
+    "lucide-react": "1.17.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-i18next": "17.0.8"
   },
   "devDependencies": {
+    "@astrojs/check": "0.9.9",
+    "@tailwindcss/vite": "4.3.0",
     "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3"
+    "@types/react-dom": "^19.2.3",
+    "tailwindcss": "4.3.0",
+    "typescript": "5.9.3"
   }
 }

@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import node from '@astrojs/node';
 import react from '@astrojs/react';
+import tailwindcss from '@tailwindcss/vite';
 
 // PAGES=true → pure-static build for GitHub Pages (no server adapter, base path).
 // Unset → local dev / Playwright tests: node adapter + dynamic API routes, root base.
@@ -56,6 +57,7 @@ export default defineConfig({
     rehypePlugins: PAGES ? [rehypeBaseLinks] : [],
   },
   vite: {
+    plugins: [tailwindcss()],
     server: {
       port: 9321,
     },

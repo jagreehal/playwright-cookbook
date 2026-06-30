@@ -1,0 +1,9 @@
+---
+// Live demo for Card 41 — a type-safe i18next storefront with a language switch.
+// The whole demo is one React island: react-i18next holds the active language in
+// context, and changing it must re-render every translated control. The Playwright
+// spec drives it with selectors built from the same JSON resources the app uses.
+import Card41I18n from './Card41I18n.tsx';
+---
+
+<Card41I18n client:load />
