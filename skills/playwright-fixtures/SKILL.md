@@ -64,7 +64,9 @@ import { test, expect } from './fixtures';
 test('navigating to settings', async ({ dashboardPage, sidebar }) => {
   await dashboardPage.goto();
   await sidebar.goTo('Settings');
-  await expect(sidebar.activeLinkName()).resolves.toBe('Settings');
+  // expect.poll re-invokes the state query until it matches — .resolves would
+  // resolve the promise once and skip auto-retry.
+  await expect.poll(() => sidebar.activeLinkName()).toBe('Settings');
 });
 ```
 

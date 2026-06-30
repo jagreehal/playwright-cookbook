@@ -19,7 +19,7 @@ const [popup] = await Promise.all([
   context.waitForEvent('page'),
   page.getByTestId('open-popup').click(),
 ]);
-await popup.waitForLoadState();
+await expect(popup.getByRole('heading')).toBeVisible();
 await expect(popup.locator('h1')).toHaveText('Popup Title');
 
 // Multi-context: two users with separate auth

@@ -22,7 +22,6 @@ test.describe('35-multi-tab-and-multi-context: Multi-tab, popups, multiple auth 
       page.getByTestId('new-tab-link').click(),
     ]);
 
-    await newPage.waitForLoadState();
     const pages = context.pages();
     expect(pages).toHaveLength(2);
 
