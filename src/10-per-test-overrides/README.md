@@ -1,8 +1,10 @@
-# Card 10: Per-Test Overrides (Error Scenarios)
+# Card 10: Per-Test Overrides (Failure Injection)
 
 ## What This Pattern Solves
 
-Most tests need the same happy path mock: a 200 with valid data. You also need to cover error responses such as 500s and 404s. Duplicating the happy-path setup in every test is wasteful. Set up a default handler once, then override it in the tests that need different behavior.
+A real backend only ever gives you the responses it happens to give. You can't ask staging for a 500 on demand, make it respond slowly for exactly one test, or have it fail twice and recover on the third call. Interception removes that limit: **every response the backend could ever produce is now available, deterministically, per test**. That's the real payoff of the mocking you learned in Cards 02–04 — not just speed, but reach. Error states, error *messages*, loading states, timeouts, and recovery flows all become testable.
+
+The mechanics this card adds: most tests need the same happy-path mock (a 200 with valid data), while a handful need a failure. Duplicating the happy-path setup in every test is wasteful. Set up a default handler once, then override it in the tests that inject failures.
 
 ## How It Works
 
@@ -21,7 +23,7 @@ This keeps scenario testing DRY: one default, many overrides.
 import type { SwapiPerson } from '../swapi/schema.js';
 
 const luke: SwapiPerson = {
-  name: 'Luke Skywalker',
+  name: 'Mocked Luke',
   height: '172',
   mass: '77',
   url: 'https://swapi.dev/api/people/1/',
@@ -38,7 +40,7 @@ test.describe('person page with error scenarios', () => {
 
   test('shows person with default mock', async ({ page }) => {
     await page.goto('/cards/10');
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
   });
 
   test('shows error UI when API returns 500', async ({ page }) => {
@@ -66,6 +68,54 @@ test.describe('person page with error scenarios', () => {
 });
 ```
 
+## Beyond Status Codes
+
+Status-code overrides are the start. Two failure modes only interception can reproduce reliably:
+
+**Slow responses.** `route.abort('timedout')` fails *instantly* with a timeout label — no time actually passes. To test what the user sees while waiting, delay the fulfill:
+
+```typescript
+test('slow response: loading state shows while waiting, then data', async ({ page }) => {
+  await page.route('**/swapi.dev/api/people/1/**', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1_500));
+    await route.fulfill({ json: luke });
+  });
+
+  await page.goto('/cards/10');
+
+  await expect(page.getByTestId('loading')).toBeVisible();
+  await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
+  await expect(page.getByTestId('loading')).toBeHidden();
+});
+```
+
+**Transient failures.** The hardest backend behaviour to trigger for real: fail twice, succeed on the third call. With a call counter the sequence is exact — and `route.fallback()` hands the third request to the happy-path default from `beforeEach`:
+
+```typescript
+test('resilience: fails twice, retry succeeds on the third call', async ({ page }) => {
+  let calls = 0;
+
+  await page.route('**/swapi.dev/api/people/1/**', async (route) => {
+    calls++;
+    if (calls < 3) {
+      await route.fulfill({ status: 500, body: '' });
+    } else {
+      await route.fallback(); // beforeEach default serves the person
+    }
+  });
+
+  await page.goto('/cards/10');
+  await expect(page.getByTestId('error')).toBeVisible();
+
+  await page.getByTestId('retry').click();
+  await expect(page.getByTestId('error')).toBeVisible();
+
+  await page.getByTestId('retry').click();
+  await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
+  expect(calls).toBe(3);
+});
+```
+
 ## Run This Example
 
 ```bash
@@ -83,12 +133,16 @@ pnpm test src/10-per-test-overrides
 - **Default handler**: Common happy-path setup in `beforeEach`
 - **Override pattern**: A second handler in specific tests runs first
 - **Route precedence**: The last registered route handler runs first
-- **Scenario testing**: Cover success and error responses
+- **Failure injection**: Statuses, malformed bodies, delays, and call-sequenced failures — responses a real backend can't produce on demand
+- **Delayed fulfill vs abort**: `abort('timedout')` is an instant failure; awaiting a delay before `fulfill` is how you test loading states and real slowness
+- **Stateful handlers**: A counter in the closure scripts a per-call sequence (fail, fail, succeed); `route.fallback()` delegates to the next handler
 - **Fresh context**: Each test gets an isolated page, so there is no cross-test pollution
 
 ## When to Use This Pattern
 
-- Testing error handling (4xx and 5xx responses)
+- Testing error handling (4xx and 5xx responses) and the exact error messages users see
+- Testing loading states, spinners, and slow-network behaviour
+- Testing retry and recovery flows (transient failures)
 - When several tests share one default plus a few error cases
 - Skip it when every test needs a different mock and no default makes sense
 - Skip it for single-test files where the setup is not reused

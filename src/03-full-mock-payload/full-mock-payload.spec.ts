@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { SwapiPerson } from '../swapi/schema';
 
 const luke = {
-  name: 'Luke Skywalker',
+  name: 'Mocked Luke',
   height: '172',
   mass: '77',
   url: 'https://swapi.dev/api/people/1/',
@@ -20,7 +20,7 @@ test.describe('03-full-mock-payload: Full inline payload', () => {
 
     await page.goto('/cards/03');
 
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
     await expect(page.getByTestId('person-height')).toHaveText('172');
     await expect(page.getByTestId('person-mass')).toHaveText('77');
   });

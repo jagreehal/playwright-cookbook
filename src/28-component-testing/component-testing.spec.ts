@@ -8,7 +8,7 @@ test.describe('28-component-testing: Component-level testing patterns', () => {
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
       route.fulfill({
         json: makePerson({
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
           url: 'https://swapi.dev/api/people/1/',
@@ -18,7 +18,7 @@ test.describe('28-component-testing: Component-level testing patterns', () => {
 
     await page.goto('/cards/01');
     await expect(page.getByRole('heading', { name: 'Person' })).toBeVisible();
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
   });
 
   test('isolated component: create element, mount, and assert in isolation', async ({

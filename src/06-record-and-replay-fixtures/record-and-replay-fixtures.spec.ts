@@ -8,9 +8,12 @@ function fixturePath(id: string) {
   return path.join(FIXTURES_DIR, `swapi.people.${id}.json`);
 }
 
-function isRecordMode() {
+function isRecordMode() {  
+  // return true;
   return process.env.RECORD_FIXTURES === '1';
 }
+
+let useRecordedValue = false;
 
 test.describe('06-record-and-replay-fixtures: Replay from fixtures', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,7 +22,7 @@ test.describe('06-record-and-replay-fixtures: Replay from fixtures', () => {
       const match = url.match(/\/people\/(\d+)/);
       const id = match ? match[1] : '1';
       const file = fixturePath(id);
-
+      useRecordedValue = !isRecordMode() && fs.existsSync(file);
       if (!isRecordMode() && fs.existsSync(file)) {
         const json = JSON.parse(fs.readFileSync(file, 'utf8'));
         return route.fulfill({
@@ -46,6 +49,6 @@ test.describe('06-record-and-replay-fixtures: Replay from fixtures', () => {
     await page.goto('/cards/06');
 
     await expect(page.getByTestId('person-name')).toBeVisible();
-    await expect(page.getByTestId('person-name')).toContainText('Luke');
+    await expect(page.getByTestId('person-name')).toContainText(useRecordedValue ? 'Recorded Luke Skywalker' : 'Luke Skywalker');
   });
 });

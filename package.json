@@ -6,7 +6,7 @@
   "packageManager": "pnpm@11.5.3",
   "scripts": {
     "test": "playwright test",
-    "test:watch": "playwright test --ui",
+    "test:watch": "playwright test --ui --project=chromium",
     "test:headed": "playwright test --headed",
     "test:debug": "PWDEBUG=1 playwright test",
     "test:record": "RECORD_FIXTURES=1 playwright test",

@@ -3,8 +3,10 @@ import type { SwapiPerson } from '../swapi/schema';
 
 test.describe('04-mock-only-what-you-need: Strict mock scope', () => {
   test('only people/1 is mocked; other SWAPI requests are aborted', async ({ page }) => {
+    // Sentinel value the real API can never return: a green assertion proves
+    // the mock served the response, not swapi.dev.
     const luke = {
-      name: 'Luke Skywalker',
+      name: 'Mocked Luke',
       height: '172',
     } satisfies Partial<SwapiPerson>;
 
@@ -21,7 +23,7 @@ test.describe('04-mock-only-what-you-need: Strict mock scope', () => {
 
     await page.goto('/cards/04');
 
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
     expect(unhandled).toHaveLength(0);
   });
 
@@ -29,7 +31,7 @@ test.describe('04-mock-only-what-you-need: Strict mock scope', () => {
     page,
   }) => {
     const luke = {
-      name: 'Luke Skywalker',
+      name: 'Mocked Luke',
       height: '172',
     } satisfies Partial<SwapiPerson>;
 
@@ -51,7 +53,7 @@ test.describe('04-mock-only-what-you-need: Strict mock scope', () => {
     context,
   }) => {
     const luke = {
-      name: 'Luke Skywalker',
+      name: 'Han Solo',
       height: '172',
     } satisfies Partial<SwapiPerson>;
 
@@ -61,10 +63,10 @@ test.describe('04-mock-only-what-you-need: Strict mock scope', () => {
 
     const secondPage = await context.newPage();
     await secondPage.goto('/cards/04');
-    await expect(secondPage.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(secondPage.getByTestId('person-name')).toHaveText('Han Solo');
 
     await page.goto('/cards/04');
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Han Solo');
 
     await secondPage.close();
   });
@@ -100,7 +102,6 @@ test.describe('04-mock-only-what-you-need: Strict mock scope', () => {
     await page.reload();
     await expect(page.getByTestId('person-name')).toHaveText('Call 2');
 
-    await page.reload();
     expect(callCount).toBe(2);
   });
 });

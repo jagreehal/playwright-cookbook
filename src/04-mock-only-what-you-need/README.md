@@ -20,8 +20,9 @@ This is strict mode for API mocking. Nothing gets through unless you allow it.
 import type { SwapiPerson } from '../swapi/schema.js';
 
 test('strict mocking: only mocked endpoints allowed', async ({ page }) => {
+  // Sentinel value the real API can never return (see Card 02).
   const luke = {
-    name: 'Luke Skywalker',
+    name: 'Mocked Luke',
     height: '172',
   } satisfies Partial<SwapiPerson>;
 
@@ -40,7 +41,7 @@ test('strict mocking: only mocked endpoints allowed', async ({ page }) => {
 
   await page.goto('/cards/04');
 
-  await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+  await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
   expect(unhandled).toHaveLength(0);
 });
 ```
@@ -64,6 +65,7 @@ pnpm test src/04-mock-only-what-you-need
 - **Fallback pattern**: A broad glob like `**/swapi.dev/**` or `**/*` catches unhandled requests.
 - **Unhandled tracking**: An array that collects URLs hitting the fallback, useful for debugging.
 - **Strict mode**: The test fails if any unmocked request is attempted.
+- **Two lines of defence**: The sentinel mock value (`'Mocked Luke'`) makes the assertion itself prove the mock applied; the `unhandled` check proves nothing leaked to the network. Either alone can miss a failure mode, together they're airtight.
 
 ## When to Use This Pattern
 

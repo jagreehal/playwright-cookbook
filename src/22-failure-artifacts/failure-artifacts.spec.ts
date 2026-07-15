@@ -33,7 +33,7 @@ const test = base.extend<{
       ref.response = {
         status: 200,
         body: {
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
         },
@@ -74,7 +74,7 @@ test.describe('22-failure-artifacts: Error capture fixture', () => {
     expect(lastApiResponse.response).not.toBeNull();
     expect(lastApiResponse.response!.status).toBe(200);
     expect(lastApiResponse.response!.body).toEqual(
-      expect.objectContaining({ name: 'Luke Skywalker' }),
+      expect.objectContaining({ name: 'Mocked Luke' }),
     );
   });
 
