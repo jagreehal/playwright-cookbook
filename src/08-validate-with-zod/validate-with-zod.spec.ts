@@ -3,7 +3,7 @@ import { SwapiPersonSchema } from '../swapi/schema';
 import type { SwapiPerson } from '../swapi/schema';
 
 const knownGoodPerson: SwapiPerson = {
-  name: 'Luke Skywalker',
+  name: 'Mocked Luke',
   height: '172',
   mass: '77',
   url: 'https://swapi.dev/api/people/1/',
@@ -18,6 +18,6 @@ test.describe('08-validate-with-zod: Validate response with Zod', () => {
 
     await page.goto('/cards/08');
 
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
   });
 });

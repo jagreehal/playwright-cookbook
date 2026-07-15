@@ -6,7 +6,7 @@ test.describe('34-retries-and-soft-assertions: expect.soft, expect.poll, test.fa
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
       route.fulfill({
         json: makePerson({
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
           url: 'https://swapi.dev/api/people/1/',
@@ -19,7 +19,7 @@ test.describe('34-retries-and-soft-assertions: expect.soft, expect.poll, test.fa
 
     // Soft assertions: both run even if one fails, errors collected at the end.
     // Change height to 'wrong-height' to see how soft assertions aggregate failures.
-    await expect.soft(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect.soft(page.getByTestId('person-name')).toHaveText('Mocked Luke');
     await expect.soft(page.getByTestId('person-height')).toHaveText('172');
   });
 

@@ -41,9 +41,8 @@ export default defineConfig({
     navigationTimeout: 20_000,
   },
   projects: [
-    // Auth bootstrap: logs in once per role, writes storageState files.
-    { name: 'setup', testMatch: /.*\.setup\.ts/, use: { ...devices['Desktop Chrome'] } },
-
+    // chromium is first so VS Code / UI Mode default to the real suite, not
+    // the setup project (which only has 2 auth bootstrap tests).
     // Functional suite: everything except visual snapshots. Depends on setup so
     // storageState files exist for the specs that consume them.
     // Selective runs: `--grep @smoke` / `--grep @integration`.
@@ -67,6 +66,10 @@ export default defineConfig({
         locale: 'en-US',
       },
     },
+
+    // Auth bootstrap: logs in once per role, writes storageState files.
+    // Listed after chromium so tooling does not default to this alone.
+    { name: 'setup', testMatch: /.*\.setup\.ts/, use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
     command: 'pnpm --filter playwright-cookbook-web dev',

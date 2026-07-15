@@ -12,13 +12,13 @@ test.describe('16-debug-unhandled-requests: Custom unhandled behavior', () => {
 
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
       route.fulfill({
-        json: makePerson({ name: 'Luke Skywalker', height: '172' }),
+        json: makePerson({ name: 'Mocked Luke', height: '172' }),
       }),
     );
 
     await page.goto('/cards/16');
 
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
     expect(unhandledSwapi).toHaveLength(0);
   });
 

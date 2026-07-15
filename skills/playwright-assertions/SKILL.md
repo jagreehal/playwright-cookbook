@@ -1,6 +1,11 @@
 ---
 name: playwright-assertions
-description: Use when writing Playwright assertions, fixing tests that have `waitForTimeout` or sleeps, debugging timing-related flakes, polling for non-UI conditions, or asserting on URLs/network/state. Establishes the web-first assertion model that eliminates the entire class of timing flakes.
+description: >-
+  Establishes web-first Playwright assertions so timing flakes disappear. Use
+  this skill when writing assertions, replacing waitForTimeout or sleeps,
+  polling non-UI conditions, or asserting on URLs, network, or state. Do not
+  use for flake root-cause triage (playwright-reliability) or locator choice
+  (playwright-locators).
 ---
 
 # Playwright Assertions & Waiting
@@ -8,6 +13,17 @@ description: Use when writing Playwright assertions, fixing tests that have `wai
 One rule prevents most flakes: **every assertion that touches the page is `await expect(locator)…`**. No sleeps, no manual polling, no fixed-delay waits.
 
 This skill covers the model, the catalogue, and the legitimate cases where you do need to poll something with the right tool.
+
+## Critical rules
+
+- Page assertions are `await expect(locator)...`. Never `waitForTimeout`. Never `await locator.isVisible()` inside an `if`.
+- For non-locator conditions, use `expect.poll` (or `toPass`), not a sleep.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing `expect` import (from fixtures vs `@playwright/test`) and any `waitForTimeout`.
+2. Replace sleeps and snapshot reads with web-first matchers from the catalogue below.
+3. Validate with `npx playwright test` on the focused spec. Re-run with `--repeat-each=5` if the original failure was a flake.
 
 ## The Mental Model
 
@@ -240,10 +256,7 @@ There is always a right tool. `waitForTimeout` does not wait for a condition; it
 - For controlling network timing so you don't *need* to wait long, see `playwright-network-mocking`.
 - For the broader flake diagnostic, see `playwright-reliability`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on the focused spec. Expect a pass.
+- The changed spec has no `waitForTimeout` and no snapshot `isVisible()` used as a wait.

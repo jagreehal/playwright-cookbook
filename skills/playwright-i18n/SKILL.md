@@ -1,6 +1,11 @@
 ---
 name: playwright-i18n
-description: Use when testing a localized UI built with i18next and react-i18next, when deciding how to select a control whose text is translated, or when making the i18next setup type-safe so a bad t() key fails the build instead of shipping an empty string. Pairs the locator priority of playwright-locators with the test-id judgment of playwright-testid-strategy for the localized case.
+description: >-
+  Makes localized Playwright tests select by translated accessible names from a
+  type-safe i18next source, not pasted copy. Use this skill when testing a
+  localized UI, selecting a control whose text is translated, or making t() keys
+  fail the build. Do not use for generic locators (playwright-locators) or
+  test-id policy (playwright-testid-strategy).
 ---
 
 # Playwright i18n Strategy
@@ -8,6 +13,19 @@ description: Use when testing a localized UI built with i18next and react-i18nex
 A localized control has no single fixed string. Its accessible name is "Checkout securely" in English and "Terminer l'achat en sécurité" in French. Two habits keep tests honest about that: make the translation source type-safe so keys cannot rot, and select controls by the translated name read from that same source, never a second copy pasted into the test.
 
 This skill sits beneath `playwright-locators` and shares the test-id judgment of `playwright-testid-strategy`. Localized copy is one of the few cases where a test id genuinely earns its place, and the rule for when is below.
+
+## Critical rules
+
+- Import the same JSON the app renders. Build selectors from it. Never paste a translated string into a spec.
+- Gate `t()` with `CustomTypeOptions` and `tsc` in CI so a bad key is a compile error, not an empty string.
+- A test id earns its place only for CMS/A/B copy; assert the rendered text separately when it is a requirement.
+
+## Workflow
+
+1. Doctor the consuming repo: find locale JSON, i18next setup, and how specs import `test`. Adapt paths; do not invent a parallel i18n tree.
+2. If types are missing, add static JSON imports plus `CustomTypeOptions` and a `tsc` gate.
+3. Change specs to select by `en.checkout` / `fr.checkout` (or the project's namespace shape).
+4. Validate with `tsc` plus a focused Playwright spec that switches locale.
 
 ## Make The Setup Type-Safe
 
@@ -35,7 +53,7 @@ declare module 'i18next' {
 }
 ```
 
-Now `t('save')` compiles, `t('xxxx')` is an error, and `t('navigation:sidebar.home')` is checked against the navigation namespace. Run `tsc` in CI so the check is a gate, not a suggestion. A focused project that includes the i18n files and every component that calls `t()` keeps the gate fast and free of unrelated errors. `locale-parity.ts` asserts every non-default locale shares the same key tree as English. The runnable setup lives in `apps/web/src/i18n`, exercised by `src/41-i18n-typesafe`.
+Now `t('save')` compiles, `t('xxxx')` is an error, and `t('navigation:sidebar.home')` is checked against the navigation namespace. Run `tsc` in CI so the check is a gate, not a suggestion. A focused tsconfig that includes the i18n files and every component that calls `t()` keeps the gate fast and free of unrelated errors. A locale-parity test should assert every non-default locale shares the same key tree as the default language.
 
 If the JSON is loaded at runtime from `/public`, a CMS, or a service, TypeScript cannot see the keys. Import the base-language JSON for typing even when the runtime copy comes from elsewhere, or generate types with the official `i18next-cli`.
 
@@ -89,12 +107,10 @@ When the translated label *is* the contract and comes from a source you can impo
 - The locator priority this skill sits beneath: `playwright-locators`.
 - The default-or-fallback question for the test id: `playwright-testid-strategy`.
 - Centralizing localized selectors so the contract can change without touching specs: `playwright-page-objects`.
-- The runnable type-safe setup and the two-tier spec: `src/41-i18n-typesafe`.
 
-## Quick Quality Checklist
+## Validation
 
-- The i18next setup imports its JSON statically and declares `CustomTypeOptions`, and `tsc` runs in CI on every `t()` call site.
-- Every non-default locale shares the same key tree as English (`locale-parity.ts`).
-- No test hardcodes a translated string; selectors are built from the same source the app renders.
-- A language switch is verified across at least two locales, and its own controls use language-stable handles.
-- A test id appears only for dynamic or CMS-driven copy, with the rendered text asserted separately.
+- Run `tsc` (or the project's typecheck script) and `npx playwright test` on the focused spec. Expect both to pass.
+- No spec hardcodes a translated string; selectors come from the same JSON the app renders.
+- A language switch is verified across at least two locales, with language-stable handles on the switch itself.
+- A test id appears only for dynamic or CMS-driven copy.

@@ -9,7 +9,7 @@ test.describe('15-done-signals: Done signals and waitForApi', () => {
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
       route.fulfill({
         json: makePerson({
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
           url: 'https://swapi.dev/api/people/1/',
@@ -27,7 +27,7 @@ test.describe('15-done-signals: Done signals and waitForApi', () => {
     expect(response.ok()).toBe(true);
 
     await expect(page.getByRole('heading', { name: 'Person' })).toBeVisible();
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
   });
 
   test('done signal for modal save: wait dialog hidden and toast', async ({

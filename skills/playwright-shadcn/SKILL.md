@@ -1,6 +1,11 @@
 ---
 name: playwright-shadcn
-description: Use when testing shadcn/ui components built on base (`@base-ui/react`) with Playwright, or when a review treats "we use shadcn, so accessibility is handled" as settled. Covers what the primitives give you (real roles, keyboard, focus traps) versus what stays application code (the accessible name), the portal scoping every overlay needs, and the surfaces where a test id hides a missing name.
+description: >-
+  Tests shadcn/ui (base-ui) components by named role, not test id, covering what
+  primitives give you versus the accessible name you still wire. Use this skill
+  when testing Select, Dialog, Toast, or other shadcn overlays, or when a review
+  treats shadcn as settling accessibility. Do not use for generic locator
+  priority (playwright-locators) or test-id policy (playwright-testid-strategy).
 ---
 
 # Playwright shadcn (base-ui) Strategy
@@ -10,6 +15,19 @@ shadcn on base (`@base-ui/react`) ships accessible primitives. A `Select` trigge
 So the failure mode shifts. Plain-HTML bad markup gives you div soup: no role, no keyboard, nothing to find. shadcn bad markup gives you a correct primitive with a missing name. The keyboard works. The role exists. The named query still fails, and a test id hides the gap.
 
 This skill sits beneath `playwright-locators` and shares its verdict with `playwright-testid-strategy`: reach for the role and name first, and let a test id earn its place only when no name exists.
+
+## Critical rules
+
+- Test the named role (`getByRole('button', { name })`), not the role type and not a test id on a named primitive.
+- Overlay popups (Select, Dialog, Toast) portal to `<body>`. Query them at page level.
+- Keep axe *and* the named-role query. axe waves through some missing labels (placeholder-as-name) that `getByLabel` still rejects.
+
+## Workflow
+
+1. Doctor the consuming repo: find how shadcn is imported, existing page objects, and `testDir`. Adapt; do not invent a parallel tree.
+2. For each surface, query by the named role or label in the table below.
+3. Scope overlays at `page`, not the field or region they belong to.
+4. Validate with a focused spec that fails if the title/label is dropped.
 
 ## The One Question
 
@@ -31,7 +49,7 @@ For each row, `getByRole('button')` or `getByRole('dialog')` without a name stil
 
 ## Build It Twice
 
-The fastest way to know whether a selector proves anything is to build the surface twice: once with the roles base-ui renders, once as a div clone wired only with `data-testid`. Run the same query against both. A named-role query passes against the good markup and returns `toHaveCount(0)` against the clone, so it finds the element and proves a user could reach it. A test id passes against both, which is what hides the problem. The runnable demos for Select and Toast live in `src/40-shadcn-components`.
+The fastest way to know whether a selector proves anything is to build the surface twice: once with the roles base-ui renders, once as a div clone wired only with `data-testid`. Run the same query against both. A named-role query passes against the good markup and returns `toHaveCount(0)` against the clone, so it finds the element and proves a user could reach it. A test id passes against both, which is what hides the problem.
 
 ```ts
 // good: base-ui Select renders a named combobox and real options
@@ -82,13 +100,10 @@ When a test id earns its place behind a stable primitive, name it for the busine
 - The locator priority this skill sits beneath: `playwright-locators`.
 - The default-or-fallback question for test ids: `playwright-testid-strategy`.
 - Centralizing overlay and field selectors so a contract can change without touching specs: `playwright-page-objects`.
-- Scanning for the accessibility gaps a test-id-only suite hides: `src/17-accessibility-axe`.
-- Runnable demos for every case here, isolated with `setContent` and rendered live at `/cards/40`: `src/40-shadcn-components`.
 
-## Quick Quality Checklist
+## Validation
 
+- Run `npx playwright test` on the focused spec (or the project's test script). Expect a pass.
 - Every shadcn surface is reached by a named role or a label, not a role type or a test id.
-- Icon buttons carry `aria-label`, dialogs carry a title, inputs carry a `FieldLabel`.
-- Overlay queries (Select popup, Dialog, Toast) scope at page level, with `exact: true` when names share a prefix.
-- Labels and dialog titles come from `useId()`-based ids, so a second instance does not cross-wire.
-- A test id appears only when no name fits, named for the business concept, and the user-visible content is asserted separately.
+- Overlay queries (Select popup, Dialog, Toast) scope at page level.
+- A test id appears only when no name fits; user-visible content is asserted separately.

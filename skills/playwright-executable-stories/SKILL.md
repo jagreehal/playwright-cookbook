@@ -1,6 +1,11 @@
 ---
 name: playwright-executable-stories
-description: Use when adding executable-stories-playwright to a Playwright suite, configuring its reporter, converting existing specs into BDD-style stories, generating user-story docs from tests, or embedding screenshots and recorded video into a test report. Turns ordinary `test()` blocks into living Markdown/HTML documentation with no `.feature` files and no step-definition glue.
+description: >-
+  Turns Playwright tests into living Markdown/HTML user stories via
+  executable-stories-playwright, with no .feature files. Use this skill when
+  adding the reporter, converting specs into BDD-style stories, or embedding
+  screenshots into generated docs. Do not use for page-object structure
+  (playwright-page-objects) or flow extraction (playwright-flows).
 ---
 
 # Playwright Executable Stories
@@ -9,10 +14,23 @@ description: Use when adding executable-stories-playwright to a Playwright suite
 
 The docs regenerate from the actual run, so they cannot drift from the tests.
 
+## Critical rules
+
+- `testInfo` is the second argument of the test callback. Pass it to `story.init(testInfo)`.
+- A CLI `--reporter` flag overrides config reporters, so docs are not written. Run plain `npx playwright test`.
+- Set `formats: ['html']` (or `['markdown']`) explicitly. The default is `cucumber-json`.
+
+## Workflow
+
+1. Doctor the consuming repo: find `playwright.config.*`, existing reporters, and how specs import `test`.
+2. Install `executable-stories-playwright` and its formatter peer with the project's package manager.
+3. Wire the reporter as a module-path tuple. Convert one spec: add `testInfo`, `story.init`, then `given`/`when`/`then`.
+4. Validate with a plain `npx playwright test` (no `--reporter` override) and open the generated HTML.
+
 ## Install
 
 ```bash
-pnpm add -D executable-stories-playwright executable-stories-formatters
+npm install -D executable-stories-playwright executable-stories-formatters
 ```
 
 `executable-stories-formatters` is a peer dependency. Install it too, or the reporter has nothing to write with.
@@ -46,7 +64,7 @@ Then wire the reporter (below) and run `npx playwright test`. The scenario lands
 Read these first. They cause the "it ran but produced nothing / timed out / report is empty" reports.
 
 1. **`testInfo` is the second argument of the test callback.** `async ({ page }, testInfo) => {`. Pass it to `story.init(testInfo)`. Omit it and the scenario is never linked to the test, so it never appears.
-2. **A CLI `--reporter` flag overrides the config reporters.** `playwright test --reporter=list` disables the story reporter, so no docs are written. To generate docs, run plain `npx playwright test` (or `pnpm test`) and let the config reporters run.
+2. **A CLI `--reporter` flag overrides the config reporters.** `playwright test --reporter=list` disables the story reporter, so no docs are written. To generate docs, run plain `npx playwright test` and let the config reporters run.
 3. **The default format is `cucumber-json`, not human-readable.** Always set `formats: ['html']` (or `['markdown']`) explicitly.
 
 ## Reporter Setup
@@ -150,7 +168,7 @@ The reporter already collects Playwright's native attachments. On `onTestEnd` it
 **Video** — record it. That is the whole step:
 
 ```ts
-test.use({ video: 'on' });   // cookbook configs often default to retain-on-failure
+test.use({ video: 'on' });   // many configs default to retain-on-failure
 ```
 
 The reporter finds the recording, inlines or copies it, and shows one player per scenario.
@@ -216,16 +234,13 @@ Generated docs and recorded media are build artifacts. Gitignore `docs/` (or you
 
 ## Cross-References
 
-- Runnable example: Card 38 (`src/38-executable-stories`) in this cookbook.
-- The journey these stories document: `playwright-flows`, and Card 11 (login flow).
+- The journey these stories document: `playwright-flows`.
 - Reporter behaviour in sharded CI: `playwright-ci`.
 - Web-first assertions the steps wrap: `playwright-assertions`.
 
-## Quick Quality Checklist
+## Validation
 
+- Run `npx playwright test` with no `--reporter` override. Expect the spec to pass and `docs/user-stories.html` (or the configured `outputDir`) to exist.
 - `testInfo` is the second callback arg and is passed to `story.init`.
 - Reporter is a module-path tuple with `formats: ['html']` (or `['markdown']`).
-- Docs generated with a plain run, not a `--reporter` override.
 - One step vocabulary across the suite (BDD or AAA, not both).
-- Screenshots/video copied into `outputDir`; report is portable.
-- `outputDir` is gitignored unless intentionally published.

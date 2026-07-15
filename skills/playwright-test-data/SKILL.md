@@ -1,11 +1,27 @@
 ---
 name: playwright-test-data
-description: Use when creating, seeding, and cleaning test data for Playwright suites, especially under parallel execution. Defines deterministic factories, per-worker namespacing, and teardown discipline.
+description: >-
+  Creates, seeds, and tears down Playwright test data that stays unique under
+  parallel workers. Use this skill when adding factories, namespacing records,
+  or cleaning up after tests. Do not use for isolation policy
+  (playwright-test-isolation) or auth storageState (playwright-auth).
 ---
 
 # Playwright Test Data
 
 Bad test data strategy is the root of most "fails in CI only" issues. This skill defines deterministic, parallel-safe data patterns.
+
+## Critical rules
+
+- Every mutable entity tests create is uniquely namespaced.
+- Fixtures create and teardown data in the same scope.
+- Log identifiers/seeds so a failure is reproducible.
+
+## Workflow
+
+1. Doctor the consuming repo: find how data is seeded today (API, UI, SQL) and whether workers collide on emails or slugs.
+2. Add factories keyed by `workerIndex` or a unique suffix. Teardown in the same fixture.
+3. Validate with `npx playwright test` using more than one worker.
 
 ## Non-Negotiables
 
@@ -71,10 +87,7 @@ export const test = base.extend<Fixtures>({
 - Auth bootstrap data: `playwright-auth`
 - CI sharding interactions: `playwright-ci`
 
-## Quick Quality Checklist
+## Validation
 
-- Every test-created record is uniquely namespaced.
-- Worker-scoped fixtures include `testInfo.workerIndex` or `testInfo.parallelIndex`.
-- Fixtures create and teardown data in the same scope.
-- Failures are reproducible from logged identifiers/seeds.
-- No test depends on mutable shared baseline records.
+- Run `npx playwright test` with more than one worker. Expect a pass.
+- Every test-created record is uniquely namespaced and torn down in the same fixture.

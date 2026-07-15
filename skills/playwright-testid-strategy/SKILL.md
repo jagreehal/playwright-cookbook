@@ -1,6 +1,11 @@
 ---
 name: playwright-testid-strategy
-description: Use when deciding whether a `data-testid` is justified, reviewing a PR that reaches for test ids, asserting that a conditional element is present or gone, or judging whether an aria-label is a real label or a test hook in disguise. Settles the "default or fallback" question that playwright-locators raises, with the cases where a test id is genuinely the only solution and the anti-patterns that hide accessibility bugs.
+description: >-
+  Decides when a data-testid is the only honest handle versus an accessibility
+  bug in disguise. Use this skill when reviewing test ids, asserting a
+  conditional element is present or gone, or judging whether an aria-label is a
+  real label or a test hook. Do not use for the locator priority itself
+  (playwright-locators) or for shadcn primitive names (playwright-shadcn).
 ---
 
 # Playwright Test ID Strategy
@@ -8,6 +13,19 @@ description: Use when deciding whether a `data-testid` is justified, reviewing a
 `playwright-locators` ranks `getByTestId` last and says reach for it only when nothing higher applies. This skill answers the next question: in the cases people actually argue about, is a test id the default they reached for too early, or the only honest handle left?
 
 A test id is a fallback for the **test contract**, not a license to skip a role, a label, or keyboard support. The mistake was never using one. The mistake is using one without thinking.
+
+## Critical rules
+
+- Ask: would you ship this attribute to a user if no test existed? A real accessible name passes. A test id is fine. An `aria-label` added only so a test can grab an element is worse than a test id.
+- Before minting a test id, check whether the element is one markup fix from a semantic handle.
+- Conditional presence/absence: assert by role or test id, never by text inversion alone.
+
+## Workflow
+
+1. Doctor the consuming repo: find `playwright.config.*`, existing page/component objects, and how specs import `test`. Adapt; do not invent a parallel tree.
+2. For each proposed `data-testid`, apply The One Question and the cases below.
+3. If a role or label would work after a one-line markup fix, make that fix and query by role/name.
+4. Validate with a focused test that fails against missing-name markup and passes against the named control.
 
 ## The One Question
 
@@ -17,7 +35,7 @@ A real accessible name passes: a screen-reader user wants to hear "Filter review
 
 ## Build It Twice
 
-The fastest way to know whether a selector proves anything is to build the surface twice — once semantic, once test-id-only — and run the same query against both. A role query that passes against the good markup and fails against the bad one is doing two jobs: finding the element and proving a real user could too. A test id passes against both, which is exactly what hides the problem. The runnable demos live in `src/39-testid-strategy`.
+The fastest way to know whether a selector proves anything is to build the surface twice — once semantic, once test-id-only — and run the same query against both. A role query that passes against the good markup and fails against the bad one is doing two jobs: finding the element and proving a real user could too. A test id passes against both, which is exactly what hides the problem.
 
 ## When a Test ID Is the Only Solution
 
@@ -71,13 +89,10 @@ If you do add one, name it for the business concept in kebab-case: `checkout-pri
 - The localized version of the copy-churn question: `playwright-i18n`, where the translated name is the contract and a test id is the fallback.
 - Centralizing selectors so a test id can change without touching specs: `playwright-page-objects` and `playwright-components`.
 - Asserting presence and absence with web-first matchers: `playwright-assertions`.
-- Scanning for the accessibility gaps a test-id-only suite hides: `src/17-accessibility-axe`.
-- Runnable good/bad demos for every case here: `src/39-testid-strategy`.
 
-## Quick Quality Checklist
+## Validation
 
-- Every test id carries a reason: clearer, more stable, or the only option — never a shortcut past a missing role or name.
-- No `aria-label` exists only to be queried; each one is a name you would ship to a user.
+- Run `npx playwright test` on the focused spec (or the project's test script). Expect a pass.
+- Every new test id has a written reason: clearer, more stable, or the only option.
+- No `aria-label` exists only to be queried.
 - Conditional elements assert presence and absence by role or test id, never by text inversion alone.
-- Inputs are reached by label, not placeholder; label ids come from `useId()`, not fixed strings.
-- Test ids name the business concept in kebab-case and key repeated items on a stable identifier.

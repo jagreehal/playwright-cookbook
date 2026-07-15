@@ -1,6 +1,6 @@
 <div class="card-10-demo">
   <div id="app">
-    <p aria-live="polite">Loading…</p>
+    <p data-testid="loading" role="status" aria-live="polite">Loading…</p>
   </div>
 </div>
 
@@ -8,7 +8,23 @@
   const API_BASE = 'https://swapi.dev/api';
   const app = document.getElementById('app');
 
+  function renderLoading() {
+    app.innerHTML =
+      '<h1>Person</h1><p data-testid="loading" role="status" aria-live="polite">Loading…</p>';
+  }
+
+  function renderError(message) {
+    app.innerHTML = `
+      <h1>Person</h1>
+      <p data-testid="error" role="alert"></p>
+      <button type="button" data-testid="retry">Try again</button>
+    `;
+    app.querySelector('[data-testid="error"]').textContent = message;
+    app.querySelector('[data-testid="retry"]').addEventListener('click', load);
+  }
+
   async function load() {
+    renderLoading();
     try {
       const res = await fetch(`${API_BASE}/people/1/`);
       if (!res.ok) {
@@ -28,7 +44,7 @@
         </div>
       `;
     } catch (err) {
-      app.innerHTML = `<h1>Person</h1><p data-testid="error" role="alert">${err.message}</p>`;
+      renderError(err.message);
     }
   }
 

@@ -8,6 +8,9 @@
     "noEmit": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    // Specs import the app's TS source directly (card 41), extension and all.
+    // Legal because noEmit is on: tsc type-checks, Playwright does the loading.
+    "allowImportingTsExtensions": true,
     "types": ["node"]
   },
   "include": ["src/**/*.ts", "playwright.config.ts"]

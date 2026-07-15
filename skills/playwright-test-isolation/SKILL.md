@@ -1,11 +1,27 @@
 ---
 name: playwright-test-isolation
-description: Use when designing for parallel test execution, debugging tests that fail only when run with others, isolating per-worker test data, deciding between `beforeAll` and fixtures, or making sure tests pass in any order. The discipline that keeps a parallel suite stable.
+description: >-
+  Keeps Playwright tests independent so they pass in any order on any worker.
+  Use this skill when designing for parallel execution, debugging tests that
+  fail only with others, or choosing beforeAll vs fixtures. Do not use for
+  factory/teardown mechanics (playwright-test-data) or auth storageState
+  (playwright-auth).
 ---
 
 # Playwright Test Isolation
 
 A test that fails when run alongside other tests is a bug, not a flake. Test isolation means every test passes when run alone, in any order, on any worker. This skill is the discipline that gets you there and keeps you there.
+
+## Critical rules
+
+- No shared mutable `beforeAll` setup. Fixtures own setup and teardown.
+- Worker-scoped data is unique per worker. Use `testInfo.workerIndex`.
+
+## Workflow
+
+1. Doctor the consuming repo: find `beforeAll`, shared DB users, and whether tests pass with `--workers=1` but fail in parallel.
+2. Move shared setup into test- or worker-scoped fixtures with teardown. Namespace data.
+3. Validate with `npx playwright test <file> --repeat-each=10` then the same with default workers.
 
 ## The Bar
 
@@ -224,10 +240,7 @@ If a flake appears on CI but not locally when you do this, see `playwright-relia
 - Network mocking to remove environment-driven flakiness: `playwright-network-mocking`.
 - The full flake diagnostic: `playwright-reliability`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run the focused file with `--workers=1` and with default workers. Expect both to pass.
+- No `beforeAll` mutates shared records.

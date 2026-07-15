@@ -1,11 +1,30 @@
 ---
 name: playwright-locators
-description: Use when choosing how to find elements in Playwright, refactoring CSS selectors to semantic ones, fixing locator-related flakes, deciding when a `data-testid` is appropriate, or working with iframes/shadow DOM. Defines the locator priority that makes tests resilient to markup changes.
+description: >-
+  Chooses Playwright locators by priority so tests survive markup changes. Use
+  this skill when finding elements, refactoring CSS selectors, fixing
+  locator-related flakes, or working with iframes and shadow DOM. Do not use
+  when the question is whether a test id is justified
+  (playwright-testid-strategy) or how to name shadcn primitives
+  (playwright-shadcn).
 ---
 
 # Playwright Locators
 
 Your locator strategy determines how well a Playwright suite ages. Get it right and a CSS class rename never breaks a test. Get it wrong and every refactor becomes a sweep across the suite.
+
+## Critical rules
+
+- Use the highest-priority locator that uniquely identifies the element.
+- Centralize locators in page/component objects. Specs do not leak CSS or `getByRole` for interactions.
+- `getByTestId` is last resort. For when it is the only honest handle, use `playwright-testid-strategy`.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing page/component objects and current selector style.
+2. Replace CSS/`nth`/`id` queries with the priority table below, starting at `getByRole`.
+3. Move remaining locators into the object that owns the UI.
+4. Validate with `npx playwright test` on the focused spec.
 
 ## The Priority
 
@@ -191,10 +210,8 @@ Or use `npx playwright codegen <url>` to record interactions and watch which loc
 - Assertions use these locators directly with web-first `expect()`. See `playwright-assertions`.
 - When the same locator strategy needs to work across two implementations (React vs. Svelte, themed UIs), see `playwright-components` for the interface pattern.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on the focused spec. Expect a pass.
+- Interaction locators live in page/component objects, not in specs.
+- No new CSS or `nth` selector was added where a role or label works.

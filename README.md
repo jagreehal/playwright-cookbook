@@ -8,7 +8,7 @@ A workshop-style guide to testing with Playwright, from your first browser test 
 
 The cookbook covers Playwright testing end to end: API mocking, locators and page objects, accessibility, auth, stability, and fixture composition.
 
-- **Progressive**: 38 cards ordered simple to complex, each building on the last.
+- **Progressive**: 43 cards ordered simple to complex, each building on the last.
 - **Workshop tested**: Follows the pedagogy of real Playwright training.
 - **Runs for real**: Every pattern runs against the demo Astro app and passes in CI.
 - **Reference quality**: Jump to any card for a self-contained pattern.
@@ -19,7 +19,7 @@ The mocking cards (02-10) use `page.route()` and `context.route()` to intercept 
 
 [![skills.sh](https://skills.sh/b/jagreehal/playwright-cookbook)](https://skills.sh/jagreehal/playwright-cookbook)
 
-This cookbook ships the patterns as **agent skills** — reusable capabilities that give your AI agent procedural knowledge for writing maintainable Playwright suites. The 22 skills under [`skills/`](./skills) cover architecture, locators, test-id strategy, shadcn (base-ui) components, type-safe i18n, fixtures, network mocking, auth, reliability, visual regression, CI, executable stories, and more. Think of them as plugins that teach your agent the conventions used throughout these cards.
+This cookbook ships the patterns as **agent skills** — reusable capabilities that give an AI agent procedural knowledge for writing maintainable Playwright suites. The 24 skills under [`skills/`](./skills) work in **any Playwright repo**. You do not need to clone this cookbook to use them. Index and install notes: [`skills/README.md`](./skills/README.md). Contributor contract: [`docs/skill-catalog.md`](./docs/skill-catalog.md).
 
 ### Install
 
@@ -30,7 +30,7 @@ Install with the [skills CLI](https://github.com/vercel-labs/skills):
 npx skills add jagreehal/playwright-cookbook
 ```
 
-This downloads the skills and makes them available to your AI agent (Claude Code, Cursor, and other compatible agents).
+This downloads the skills and makes them available to Claude Code, Cursor, and other compatible agents. Cloning this repo is optional: it is the workshop (runnable cards). The skills pack is the portable agent layer.
 
 
 ## Playwright MCP
@@ -246,6 +246,7 @@ pnpm lint --fix    # Auto-fix fixable issues
 | [39-testid-strategy](./src/39-testid-strategy/README.md) | When a test id earns its place vs hides a missing role | Build-it-twice, `aria-labelledby` vs slug labels, conditional wrappers, `useId()` |
 | [40-shadcn-components](./src/40-shadcn-components/README.md) | Testing shadcn (base-ui) components, isolated + rendered | Named `combobox`/`option`, `Notifications` region, portal scoping, named-role vs test id, hydration-safe interaction |
 | [41-i18n-typesafe](./src/41-i18n-typesafe/README.md) | Type-safe i18next, tested by the translated name | `CustomTypeOptions`, `tsc` gate, select by shared translation source, language switch, JSON import attributes |
+| [42-webmcp-tools](./src/42-webmcp-tools/README.md) | Testing a page that exposes WebMCP tools to agents | `document.modelContext`, `addInitScript` double, real-Chrome native lane, feature detection, tool schemas |
 
 ## Quick Reference
 

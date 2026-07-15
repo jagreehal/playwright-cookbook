@@ -1,6 +1,11 @@
 ---
 name: build-tested-components
-description: Use when building a new UI component or feature with its tests, hardening an existing component for testability, or adding component/e2e coverage. Co-designs accessible markup with role-first selectors so the query that finds an element also proves a real user can reach it, then drives a two-tier test matrix (jsdom component tests + Playwright/axe journeys). Triggers on "build a component", "add tests for X", "write tests", "make this testable", "cover this component".
+description: >-
+  Co-designs accessible markup with its tests: role-first selectors plus a
+  two-tier matrix (jsdom + Playwright/axe). Use this skill when building a
+  component or feature with tests, hardening testability, or adding coverage.
+  Do not use for locator priority alone (playwright-locators) or test-id
+  policy (playwright-testid-strategy).
 ---
 
 # Build Tested Components
@@ -9,14 +14,20 @@ A component and its tests are one design problem, not two. If you write the mark
 
 This skill produces two things together: an accessible component, and a thorough two-tier test suite for it. "Thorough" is defined by the coverage matrix below — not "more `expect`s", but one test per affordance, state, and failure the component actually has.
 
+## Critical rules
+
+- Design the accessible surface before JSX. If an element has no user-facing handle, that is a markup bug, not a test-id reason.
+- Run both tiers and the type check. A suite you describe but do not run is not done.
+
 ## Workflow
 
-1. **Design the accessible surface first.** Before writing JSX, list how a user reaches each element: a button by its name, a field by its label, a region by its heading, a status by its live region. If an element has no user-facing handle, that is a markup bug to fix now, not a reason for a test id. This list *is* your selector list.
-2. **Build with semantic elements.** Real `<button>`, `<form>`, `<label htmlFor>`, `<a href>`, landmarks (`<nav>`, `<main>`, `<section aria-labelledby>`), `role="status"`/`role="alert"` for async announcements. Icon-only controls get `aria-label`; decorative icons get `aria-hidden="true"`.
-3. **Centralize selectors** in a component object / page object (see below) so specs read as behaviour and a markup change touches one file.
-4. **Write component-tier tests** (jsdom + Testing Library) covering the matrix. Fast, isolated, one query-level fact per test.
-5. **Write an e2e journey** (Playwright) for the real user path through the feature, plus an `axe` pass on the rendered surface.
-6. **Run both tiers and the type check. Paste the green output.** A test suite you describe but do not run is not done.
+1. Doctor the consuming repo: find component test runner (Vitest/Jest), Playwright config, and existing component/page objects.
+2. **Design the accessible surface first.** Before writing JSX, list how a user reaches each element: a button by its name, a field by its label, a region by its heading, a status by its live region. This list *is* your selector list.
+3. **Build with semantic elements.** Real `<button>`, `<form>`, `<label htmlFor>`, landmarks, `role="status"`/`"alert"`. Icon-only controls get `aria-label`.
+4. **Centralize selectors** in a component/page object so specs read as behaviour.
+5. **Write component-tier tests** (jsdom + Testing Library) covering the matrix.
+6. **Write an e2e journey** plus an `axe` pass on the rendered surface.
+7. Validate: run both tiers and the type check (see below).
 
 ## Author for the Locator Priority
 
@@ -179,13 +190,3 @@ Authoritative docs to verify specifics against (prefer these over blog posts):
 - Playwright web-first (auto-waiting) assertions: <https://playwright.dev/docs/test-assertions>.
 - `@axe-core/playwright` accessibility scanning: <https://playwright.dev/docs/accessibility-testing>.
 - ARIA roles and accessible-name computation: <https://www.w3.org/TR/wai-aria-1.2/> and <https://www.w3.org/TR/accname-1.2/>.
-
-## Quick Quality Checklist
-
-- The selector list was designed before the markup; every element has a user-facing handle.
-- Markup is semantic: real buttons/forms/labels/landmarks; icon controls named, decorative icons hidden.
-- Every applicable coverage-matrix row has a test, including the negative/a11y proof and error/empty/loading states.
-- Locators are role-first; every `data-testid` carries a reason and a meaningful kebab-case name.
-- Selectors are centralized in a component/page object; specs read as behaviour.
-- e2e adds one real journey plus a scoped `axe` pass; no `waitForTimeout` as synchronization.
-- Both tiers and the type check were run; the green output is shown.

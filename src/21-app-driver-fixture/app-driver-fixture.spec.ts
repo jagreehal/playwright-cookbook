@@ -7,7 +7,7 @@ const test = base.extend<{ app: AppDriver }>({
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
       route.fulfill({
         json: makePerson({
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
           url: 'https://swapi.dev/api/people/1/',
@@ -25,14 +25,14 @@ test.describe('21-app-driver-fixture: App driver fixture and test.step', () => {
     });
 
     await personPage.assertLoaded();
-    await expect(personPage.name).toHaveText('Luke Skywalker');
+    await expect(personPage.name).toHaveText('Mocked Luke');
   });
 
   test('test.step wraps flow for report', async ({ app }) => {
     await test.step('Open person and assert name', async () => {
       const personPage = await app.person.open('1');
       await personPage.assertLoaded();
-      await expect(personPage.name).toHaveText('Luke Skywalker');
+      await expect(personPage.name).toHaveText('Mocked Luke');
     });
   });
 
@@ -45,7 +45,7 @@ test.describe('21-app-driver-fixture: App driver fixture and test.step', () => {
       await expect(personPage.name).toHaveText(expectedName);
     };
 
-    await verifyPerson('Luke Skywalker');
+    await verifyPerson('Mocked Luke');
   });
 
   test('app.auth.loginAs: login and navigate to protected page', async ({

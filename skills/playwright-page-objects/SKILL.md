@@ -1,11 +1,28 @@
 ---
 name: playwright-page-objects
-description: Use when deciding whether to create a page object, designing the API of one, refactoring page objects that have grown unwieldy, or removing page objects that aren't earning their keep. The Page Object pattern done with restraint: abstract when the page earns it, never before.
+description: >-
+  Designs Playwright page objects with restraint: abstract when the page earns
+  it, never before. Use this skill when deciding whether to create a page
+  object, designing its API, or refactoring one that has grown unwieldy. Do not
+  use for reusable fragments (playwright-components) or multi-page journeys
+  (playwright-flows).
 ---
 
 # Playwright Page Objects
 
 A page object is a class that owns the locators and user actions for one screen. Done well, it makes specs read like user stories. Done badly, it adds a thin layer of `clickX()` methods that creates noise without saving anyone time.
+
+## Critical rules
+
+- Create a page object when two or more of the "earns an object" checks below are true. Otherwise keep locators in a component or the spec's fixture.
+- Methods are user actions. Locators stay private.
+- Specs never call `new LoginPage(page)`. Fixtures construct page objects.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing pages/, fixtures, and whether specs already construct page objects.
+2. Add or trim the page object using the rules below. Wire it through `fixtures.ts`.
+3. Validate with `npx playwright test` on a spec that goes through the page object.
 
 ## When a Page Earns an Object
 
@@ -222,10 +239,7 @@ No selectors. No construction. Two distinct user behaviours, each verifiable in 
 - Cross-page journeys (login flows that span login + dashboard) live as flows, not page-object methods: `playwright-flows`.
 - Locator strategies for the fields: `playwright-locators`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on a spec that uses the page object. Expect a pass.
+- Methods are user actions. Specs do not construct the page object.
