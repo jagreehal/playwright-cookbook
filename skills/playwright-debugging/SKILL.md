@@ -1,11 +1,27 @@
 ---
 name: playwright-debugging
-description: Use when a Playwright test fails and you need fast root-cause diagnosis using trace viewer, inspector, console/network evidence, and repeatable repro commands. Focuses on shortest path from failure to permanent fix.
+description: >-
+  Diagnoses a failing Playwright test from trace, inspector, and console
+  evidence, then applies a permanent fix. Use this skill when a test fails and
+  you need the shortest path from failure to fix. Do not use for suite-wide
+  flake policy (playwright-reliability) or for writing assertions
+  (playwright-assertions).
 ---
 
 # Playwright Debugging
 
 Debugging should be evidence-first: reproduce, capture trace, isolate failure class, apply targeted fix.
+
+## Critical rules
+
+- Reproduce before changing. Open the trace. Classify, then fix.
+- Do not add `waitForTimeout` as a "fix".
+
+## Workflow
+
+1. Doctor the consuming repo: find the failing spec, existing trace/screenshot settings, and the exact test title.
+2. Follow the 5-step triage below.
+3. Validate with `--repeat-each=10` on the failing test. Expect a pass.
 
 ## 5-Step Triage
 
@@ -61,10 +77,7 @@ npx playwright show-trace test-results/**/trace.zip
 - Network fixes: `playwright-network-mocking`
 - Suite hardening: `playwright-reliability`
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- The original failure was reproduced. The trace was opened.
+- After the fix, `npx playwright test <file> -g "<title>" --repeat-each=10` passes.

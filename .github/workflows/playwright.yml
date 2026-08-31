@@ -33,6 +33,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Typecheck i18n
         run: pnpm typecheck
+      - name: Validate skills pack
+        run: pnpm validate:skills
 
   # Shard the suite across runners. Each shard emits a blob report; a final job
   # merges the blobs into one HTML report (playwright-ci).

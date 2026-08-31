@@ -1,11 +1,28 @@
 ---
 name: playwright-config
-description: Use when creating or refactoring playwright.config.ts, defining projects and dependencies, splitting smoke vs integration runs, setting retries/workers/timeouts, or hardening config for CI. Opinionated defaults and decision rules for config that scales.
+description: >-
+  Creates and hardens playwright.config.ts: projects, timeouts, retries, and
+  CI defaults. Use this skill when creating or refactoring the config,
+  splitting smoke vs integration, or setting workers and timeouts. Do not use
+  for tag taxonomy (playwright-projects-tags) or CI workflow YAML
+  (playwright-ci).
 ---
 
 # Playwright Config
 
 The config file holds the suite's architecture. A weak `playwright.config.ts` creates slow, flaky suites even when the tests are good.
+
+## Critical rules
+
+- `forbidOnly` on CI. Retries on CI only. Traces on first retry.
+- Do not pin `workers: 1` on an isolated, parallel-safe suite.
+- Discover the project's `testDir` and `baseURL`. Do not assume `e2e/` or a cookbook port.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing `playwright.config.*`, package manager, webServer command, and `testDir`.
+2. Apply the non-negotiable defaults below, adapted to that layout.
+3. Validate with `npx playwright test --list` then a focused spec run.
 
 ## Non-Negotiable Defaults
 
@@ -95,10 +112,7 @@ projects: [
 - Flake triage: `playwright-reliability`, `playwright-debugging`
 - Network posture: `playwright-network-mocking`
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test --list` then a focused spec. Expect both to succeed.
+- Config has `forbidOnly` on CI, traces on first retry, and a discovered `testDir`/`baseURL`.

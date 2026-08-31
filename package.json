@@ -12,7 +12,10 @@
     "test:record": "RECORD_FIXTURES=1 playwright test",
     "dev:web": "pnpm --filter playwright-cookbook-web dev",
     "lint": "eslint .",
-    "typecheck": "pnpm --filter playwright-cookbook-web typecheck:i18n"
+    "validate:skills": "node scripts/validate-skills.mjs",
+    "typecheck": "pnpm --filter playwright-cookbook-web typecheck:i18n",
+    "test:webmcp": "playwright test src/42-webmcp-tools --project=chromium",
+    "test:webmcp:native": "playwright test --config=playwright-webmcp-native.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.3",

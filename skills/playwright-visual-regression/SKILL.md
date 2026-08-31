@@ -1,11 +1,27 @@
 ---
 name: playwright-visual-regression
-description: Add Playwright screenshot regression tests with deterministic rendering, scoped baselines, and CI-safe review policy. Use when adding `toHaveScreenshot`, debugging visual diffs, stabilizing snapshots, or deciding which UI regions should have visual coverage.
+description: >-
+  Adds Playwright screenshot tests with deterministic rendering and CI-safe
+  review. Use this skill when adding toHaveScreenshot, debugging visual diffs,
+  or deciding which regions get snapshots. Do not use for functional
+  assertions (playwright-assertions) or project/tag splits
+  (playwright-projects-tags).
 ---
 
 # Playwright Visual Regression
 
 Visual tests are high-signal only when rendering is deterministic. This skill defines the minimum policy.
+
+## Critical rules
+
+- Disable animations and hide the caret. Pin viewport, timezone, and locale.
+- Snapshot stable, high-value regions. Tag visual tests and isolate them in a project.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing screenshot tests, CI OS, and whether fonts/animations already differ across runners.
+2. Add a visual project with pinned rendering. Scope snapshots. Set a review policy for diffs.
+3. Validate with `npx playwright test --project=<visual-project>` (or `--grep @visual`). Expect a pass on a clean baseline; a real UI change should fail the snapshot.
 
 ## Non-Negotiables
 
@@ -57,10 +73,7 @@ test('settings header visual @visual', async ({ page }) => {
 - CI determinism: `playwright-ci`, `playwright-config`
 - Debugging diffs: `playwright-debugging`
 
-## Quick Quality Checklist
+## Validation
 
-- Visual tests are tagged and isolated.
-- Animations/caret are disabled in screenshot assertions.
-- Environment (viewport/timezone/locale) is pinned.
-- Snapshots focus on stable, high-value regions.
-- Diff review process is explicit in PR flow.
+- Run the visual project or `@visual` grep. Expect a pass on an unchanged UI.
+- Animations/caret are disabled. Viewport/timezone/locale are pinned.

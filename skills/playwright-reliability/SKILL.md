@@ -1,6 +1,11 @@
 ---
 name: playwright-reliability
-description: Use when diagnosing flaky Playwright tests, deciding whether a flake is a real bug, configuring retries, working with the trace viewer, or auditing a suite for reliability. The diagnostic and the playbook for permanent fixes, and the answer to "our E2E tests are flaky."
+description: >-
+  Diagnoses flaky Playwright tests and applies a permanent fix, not a retry.
+  Use this skill when tests flake, when deciding whether a flake is a product
+  bug, or when auditing retries and traces. Do not use for first-pass
+  assertion choice (playwright-assertions) or isolation design
+  (playwright-test-isolation).
 ---
 
 # Playwright Reliability
@@ -8,6 +13,18 @@ description: Use when diagnosing flaky Playwright tests, deciding whether a flak
 There is no such thing as an inherently flaky test. There are tests with hidden race conditions, hidden shared state, or hidden network dependencies. Each one has a specific cause and a permanent fix. This skill is the diagnostic that finds the cause and the playbook that applies the fix.
 
 Aim for zero flakes, not fewer. A flake that retries to green is a bug you've decided to live with.
+
+## Critical rules
+
+- Classify before changing: locator, timing, state leak, network, product bug.
+- Prove the fix with `--repeat-each`. A single green run is not evidence.
+- Retries hide bugs. Do not raise retries as the fix.
+
+## Workflow
+
+1. Doctor the consuming repo: reproduce with `npx playwright test <file> -g "<title>" --repeat-each=30`, then `--workers=1`.
+2. Open the trace. Classify using the flowchart below. Apply the matching fix from the other skills.
+3. Validate with the same `--repeat-each` command. Expect a pass.
 
 ## Diagnostic Flowchart
 
@@ -297,10 +314,7 @@ A suite that passes this audit is one you can trust.
 - Storage state for auth (and the isolation it gives you): `playwright-auth`.
 - The architectural rules that make the whole reliability story possible: `playwright-architecture`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- The failing test was reproduced with `--repeat-each` before the fix.
+- After the fix, the same command passes. A single green run is not enough.

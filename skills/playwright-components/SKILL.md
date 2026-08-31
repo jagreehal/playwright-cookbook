@@ -1,11 +1,26 @@
 ---
 name: playwright-components
-description: Use when modelling reusable UI fragments (sidebars, headers, modals, table rows, cards) in Playwright tests, when the same locators appear on multiple pages, or when one feature renders differently across themes/frameworks/A-B variants. The container-rooted component pattern that composes anywhere without ceremony.
+description: >-
+  Models reusable UI fragments as container-rooted component objects. Use this
+  skill when the same locators appear on multiple pages, or when a fragment
+  (sidebar, modal, table row) must compose anywhere. Do not use for a whole
+  screen (playwright-page-objects) or a multi-page journey (playwright-flows).
 ---
 
 # Playwright Components
 
 A component object is a class that owns the locators and actions for one **fragment** of UI: a sidebar, a header, a modal, or a table row. Components are the smallest reusable unit in this convention. They compose into pages, nest inside each other, and repeat across rows, all while surviving markup changes without touching specs.
+
+## Critical rules
+
+- Root the component at a `Locator`, not at `Page`.
+- Specs request components via fixtures. Pages may construct private child components they own.
+
+## Workflow
+
+1. Doctor the consuming repo: find repeated locators across specs/pages and existing `components/`.
+2. Extract a container-rooted class. Wire it through fixtures or as a page-owned child.
+3. Validate with `npx playwright test` on a spec that uses the component in two places.
 
 ## The Container-Rooted Pattern
 
@@ -287,10 +302,7 @@ Three components in play (`UserTable`, `UserRow`, `Modal`) and one page object (
 - How the fixture file wires components into specs: `playwright-fixtures`.
 - The locator strategies the components use internally: `playwright-locators`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on a spec that uses the component. Expect a pass.
+- The component is rooted at a Locator. Specs do not construct it when fixtures exist.

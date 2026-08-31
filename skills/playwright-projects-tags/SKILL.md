@@ -1,11 +1,27 @@
 ---
 name: playwright-projects-tags
-description: Design Playwright project matrices and tag taxonomy for selective local, PR, and nightly runs. Use when splitting smoke/integration/visual tests, adding setup dependencies, avoiding duplicated project coverage, or deciding how tests should be filtered in CI.
+description: >-
+  Designs Playwright project matrices and tag taxonomy for smoke, PR, and
+  nightly runs. Use this skill when splitting smoke/integration/visual tests,
+  adding setup dependencies, or deciding how tests are filtered in CI. Do not
+  use for playwright.config.ts timeouts and retries (playwright-config) or CI
+  YAML (playwright-ci).
 ---
 
 # Playwright Projects & Tags
 
 Project and tag strategy decides whether the suite stays fast as it grows or buckles under runtime.
+
+## Critical rules
+
+- Tags encode execution intent (`@smoke`, `@integration`, `@visual`), not team names.
+- Setup ordering uses `dependencies`, not implicit file order.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing projects, grep/tags, and CI job commands.
+2. Add or tighten the matrix and tag taxonomy below. Point CI at `--grep @smoke` for PRs if that is the split.
+3. Validate with `npx playwright test --list --grep @smoke` (or the project's tags) and confirm the count matches intent.
 
 ## Non-Negotiables
 
@@ -66,10 +82,7 @@ npx playwright test --project=chromium-integration
 - Auth setup project: `playwright-auth`
 - Flake triage: `playwright-reliability`
 
-## Quick Quality Checklist
+## Validation
 
-- Tag taxonomy is documented and enforced.
-- Project filters are mutually intentional.
-- Setup ordering uses dependencies, not implicit assumptions.
-- PR job runs a fast meaningful subset.
-- Nightly job covers integration/deeper scenarios.
+- `npx playwright test --list --grep @smoke` (or the project's tags) returns the intended subset.
+- Setup projects are declared with `dependencies`.

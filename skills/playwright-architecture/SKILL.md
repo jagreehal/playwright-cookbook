@@ -1,11 +1,33 @@
 ---
 name: playwright-architecture
-description: Use when starting a new Playwright suite, restructuring an existing one, deciding where new test code should live, or onboarding a team to a maintainable convention. The spine of the playwright-skills pack. It defines the folder layout, the five non-negotiable rules, and how locators, components, pages, flows, and fixtures compose. Read this first.
+description: >-
+  Defines the Playwright suite folder layout and five non-negotiable rules
+  (fixtures own construction, selectors live in one place, action-named methods,
+  web-first assertions, test independence). Use this skill when starting a new
+  Playwright suite, restructuring an existing one, deciding where test code
+  should live, or onboarding a team. Do not use for locator choice
+  (playwright-locators), fixture mechanics (playwright-fixtures), or flake
+  diagnosis (playwright-reliability).
 ---
 
 # Playwright Architecture
 
 The convention. Every other skill in this pack is a deeper dive into one part of what's described here.
+
+## Critical rules
+
+- Specs ask for fixtures. They do not call `new`, import from `@playwright/test`, or build helpers inline.
+- Selectors live in the component or page object that owns the UI.
+- Methods are user actions (`signIn`), not DOM operations (`clickLoginButton`).
+- Every page assertion is `await expect(locator)...`. No `waitForTimeout`.
+- Tests are independent. No shared mutable `beforeAll` setup.
+
+## Workflow
+
+1. Doctor the consuming repo: find `playwright.config.*`, current test directory, and whether a `fixtures.ts` already exists. Adapt this layout; do not invent a second tree beside an existing one.
+2. Create or align `e2e/` with `components/`, `pages/`, `flows/`, and `fixtures.ts`.
+3. Move spec-visible construction into fixtures. Move selectors into page/component objects. Extract repeated journeys into flows.
+4. Validate with a focused `npx playwright test` on one migrated spec.
 
 ## The Thesis
 
@@ -48,8 +70,6 @@ test('user can sign in', async ({ page }) => {
 **Failure mode without it:** wiring code multiplies across the suite. When a constructor signature changes, you edit fifty files.
 
 Fixtures are the composition root for objects a spec can request. Page objects may still construct private child components that they own; the line is that specs never see that wiring.
-
-**One carve-out — teaching/demo specs.** A spec whose *purpose* is to demonstrate a single layer in isolation (e.g. "here is the locators+actions+flow split", or "here is a bespoke per-file `test.extend` driver") may import from `@playwright/test` and construct objects directly — that's the thing it's showing. Production specs in the same suite still go through `fixtures.ts`. The rule protects a real suite from wiring sprawl; it isn't meant to stop a focused example from exhibiting the layer beneath the fixtures.
 
 ### 2. Selectors live in exactly one place
 
@@ -221,6 +241,12 @@ For diagnosing a flake that slipped through and turning it into a permanent fix,
 | Methods mirror DOM actions only (`clickX`) | Page objects add indirection but no abstraction | Expose user-intent methods (`signIn`, `goToSettings`) |
 | `waitForTimeout` as synchronization | Timing flakes and CI-only failures | Use web-first assertions and locator auto-waiting |
 | Shared mutable setup in `beforeAll` | Order-dependent and parallel-collision failures | Use test/worker-scoped fixtures with teardown |
+
+## Validation
+
+- Run `npx playwright test` on a spec that uses the new layout (or the project's test script). Expect a pass.
+- Specs import `test` from `./fixtures`, not `@playwright/test`.
+- No spec calls `new` for a page, component, or flow.
 
 ## Quick Quality Checklist
 
