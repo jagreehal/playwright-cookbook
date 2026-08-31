@@ -1,6 +1,10 @@
 ---
 name: playwright-fixtures
-description: Use when designing the fixtures.ts file for a Playwright suite, deciding between test-scoped and worker-scoped fixtures, composing fixtures together, providing options with defaults, or wiring page objects, components, and flows into specs. The DI layer that lets specs read like user stories.
+description: >-
+  Designs the fixtures.ts composition root: test vs worker scope, options, and
+  wiring page objects into specs. Use this skill when designing fixtures,
+  composing them, or providing options with defaults. Do not use for the suite
+  layout (playwright-architecture) or for auth storageState (playwright-auth).
 ---
 
 # Playwright Fixtures
@@ -8,6 +12,19 @@ description: Use when designing the fixtures.ts file for a Playwright suite, dec
 Fixtures are Playwright's dependency-injection mechanism, and the most important architectural feature in the framework. They let specs declare what they need rather than constructing it, and they handle setup and teardown automatically.
 
 In this convention, `fixtures.ts` is the composition root for anything a spec can request. Specs never call `new`; fixtures construct spec-visible pages, components, and flow wrappers. Page objects can still construct private child components they own.
+
+## Critical rules
+
+- Specs import `test` and `expect` from `./fixtures`, never from `@playwright/test`.
+- Test-scoped by default. Worker-scoped only for expensive, isolated setup.
+- Worker-scoped data must be unique per `testInfo.workerIndex` (or `parallelIndex`).
+
+## Workflow
+
+1. Doctor the consuming repo: find existing `fixtures.ts` / `test.extend`, `testDir`, and how specs import `test`. Extend that file; do not start a second composition root.
+2. Add types for options, pages, components, and flows. Implement each fixture with `use()`.
+3. Switch specs to request fixtures instead of constructing objects.
+4. Validate with `npx playwright test` on a spec that uses the new fixtures.
 
 ## The Shape
 
@@ -340,10 +357,7 @@ Read top to bottom: types describe the surface, the body describes how each is b
 - Auth via storage state, which removes the need for per-test login fixtures: `playwright-auth`.
 - Worker-scoped data isolation: `playwright-test-isolation`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on a spec that uses the new fixtures. Expect a pass.
+- Specs import `test` from `./fixtures`. No spec calls `new` for a page, component, or flow.

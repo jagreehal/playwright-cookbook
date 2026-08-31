@@ -1,11 +1,27 @@
 ---
 name: playwright-flows
-description: Use when modelling user journeys that span multiple pages (login, signup, checkout, onboarding), when the same multi-step sequence is needed in many specs, or when deciding whether a sequence belongs in a page object vs a flow. Plain async functions with one job: orchestrate the journey and leave the assertions to the spec.
+description: >-
+  Models multi-page user journeys as plain async functions that leave
+  assertions to the spec. Use this skill when login, signup, checkout, or
+  onboarding is needed in many specs, or when deciding page object vs flow.
+  Do not use for a single screen (playwright-page-objects) or for auth
+  storageState (playwright-auth).
 ---
 
 # Playwright Flows
 
 A flow is a plain async function that walks a user through a multi-page journey. Login, signup, checkout, "create project then invite teammate." Flows live alongside pages and components rather than inside them, so they don't couple unrelated parts of the UI.
+
+## Critical rules
+
+- A flow orchestrates. The spec asserts.
+- Expose flows as callable fixtures. Specs do not import flow files directly if the suite already uses `fixtures.ts`.
+
+## Workflow
+
+1. Doctor the consuming repo: find repeated multi-step sequences and existing `flows/` / fixtures.
+2. Extract a flow function. Wrap it as a callable fixture.
+3. Validate with `npx playwright test` on two specs that share the journey.
 
 ## What a Flow Is
 
@@ -221,10 +237,7 @@ The spec asks for a logged-in paid user (via a flow-backed fixture), navigates t
 - Auth as the canonical flow + storage-state pattern: `playwright-auth`.
 - Mocking upstream services so flows are deterministic: `playwright-network-mocking`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on two specs that share the flow. Expect both to pass.
+- The flow has no assertions. Specs assert.

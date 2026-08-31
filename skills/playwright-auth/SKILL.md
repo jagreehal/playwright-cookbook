@@ -1,6 +1,11 @@
 ---
 name: playwright-auth
-description: Use when setting up authentication for a Playwright suite, replacing per-test UI logins with a faster pattern, supporting multiple user roles in one suite, or handling OAuth/SSO. The storage-state pattern turns 30-second test setups into 10-millisecond ones and removes auth-related flakes.
+description: >-
+  Replaces per-test UI logins with Playwright storageState so auth is fast and
+  stable. Use this skill when setting up authentication, supporting multiple
+  roles, or handling OAuth/SSO. Do not use for generic fixture wiring
+  (playwright-fixtures) or for modelling the login journey as a flow
+  (playwright-flows).
 ---
 
 # Playwright Authentication
@@ -8,6 +13,19 @@ description: Use when setting up authentication for a Playwright suite, replacin
 If your tests log in through the UI on every run, your suite pays a tax of 5–30 seconds per test. Across 200 tests that wastes an hour per CI run, and every login is another chance to flake.
 
 To fix this, use the **storage-state pattern**: log in once, persist the resulting cookies and `localStorage`, then reuse them across every test. With a setup project and project dependencies it's a five-minute change that pays off on every CI run after.
+
+## Critical rules
+
+- Log in once per role in a setup project. Tests start from `storageState`.
+- Isolate files per role (`playwright/.auth/user.json`, `admin.json`). Never share a writable auth file across workers that mutate it.
+- Anonymous tests get an empty storage state, not "skip the setup project".
+
+## Workflow
+
+1. Doctor the consuming repo: find login URL, existing auth helpers, `playwright.config` projects, and where credentials come from (env, not committed).
+2. Add `auth.setup.ts` and a `setup` project. Point the default project at the stored state.
+3. Remove per-test UI login from specs that use the default role. Add extra contexts for other roles.
+4. Validate with `npx playwright test` on a spec that previously logged in through the UI.
 
 ## The Pattern
 
@@ -245,10 +263,7 @@ If a test fails with "redirected to /login," your storage state has expired. Re-
 - Mocking an OAuth/SSO provider: `playwright-network-mocking`.
 - Why this pattern is also a test-isolation win: `playwright-test-isolation`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on a spec that uses storageState. Expect a pass without a UI login in that spec.
+- Auth files are written by setup and gitignored. Credentials come from env.

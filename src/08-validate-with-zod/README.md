@@ -22,7 +22,7 @@ import type { SwapiPerson } from '../swapi/schema.js';
 
 // Schema lives in src/swapi/schema.ts and is shared across cards.
 const knownGoodPerson: SwapiPerson = {
-  name: 'Luke Skywalker',
+  name: 'Mocked Luke',
   height: '172',
   mass: '77',
   url: 'https://swapi.dev/api/people/1/',
@@ -37,7 +37,7 @@ test('schema gates the boundary; only parsed data reaches the page', async ({ pa
 
   await page.goto('/cards/08');
 
-  await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+  await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
 });
 ```
 

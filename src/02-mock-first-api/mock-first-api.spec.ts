@@ -4,7 +4,7 @@ import type { SwapiPerson } from '../swapi/schema';
 test.describe('02-mock-first-api: Playwright + page.route', () => {
   test('GET people/1 returns mocked person in UI', async ({ page }) => {
     const luke = {
-      name: 'Luke Skywalker',
+      name: 'Mocked Luke',
       height: '172',
     } satisfies Partial<SwapiPerson>;
 
@@ -14,7 +14,7 @@ test.describe('02-mock-first-api: Playwright + page.route', () => {
 
     await page.goto('/cards/02');
 
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
     await expect(page.getByTestId('person-height')).toHaveText('172');
   });
 });

@@ -5,7 +5,7 @@ import { loadPersonPage } from '../e2e-patterns/person/actions';
 import type { SwapiPerson } from '../swapi/schema';
 
 const luke: SwapiPerson = {
-  name: 'Luke Skywalker',
+  name: 'Mocked Luke',
   height: '172',
   mass: '77',
   url: 'https://swapi.dev/api/people/1/',
@@ -25,7 +25,7 @@ test.describe('12-locators-actions-flows: 3-layer model', () => {
     await personPage.assertLoaded();
 
     const $ = personPageLocators(page);
-    await expect($.name).toHaveText('Luke Skywalker');
+    await expect($.name).toHaveText('Mocked Luke');
   });
 
   test('actions and locators used without flows', async ({ page }) => {
@@ -33,6 +33,6 @@ test.describe('12-locators-actions-flows: 3-layer model', () => {
 
     const $ = personPageLocators(page);
     await expect($.heading).toBeVisible();
-    await expect($.name).toHaveText('Luke Skywalker');
+    await expect($.name).toHaveText('Mocked Luke');
   });
 });

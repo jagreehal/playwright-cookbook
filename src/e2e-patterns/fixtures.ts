@@ -58,7 +58,7 @@ export const test = base.extend<Fixtures>({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
           url: 'https://swapi.dev/api/people/1/',

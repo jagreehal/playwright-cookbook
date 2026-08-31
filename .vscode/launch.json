@@ -2,23 +2,36 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Playwright: Debug Current Test",
+      "name": "Playwright: Debug Current File",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["playwright", "test", "${relativeFile}", "--headed", "--debug"],
+      "runtimeArgs": [
+        "playwright",
+        "test",
+        "${relativeFile}",
+        "--project=chromium",
+        "--debug"
+      ],
       "skipFiles": ["<node_internals>/**"],
-      "console": "integratedTerminal",
-      "env": {
-        "PWDEBUG": "1"
-      }
+      "console": "integratedTerminal"
     },
     {
-      "name": "Playwright: Debug Current Test (headless)",
+      "name": "Playwright: Debug Test by Name (current file)",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["playwright", "test", "${relativeFile}", "--debug"],
+      "runtimeArgs": [
+        "playwright",
+        "test",
+        "${relativeFile}",
+        "--project=chromium",
+        "-g",
+        "${input:testName}",
+        "--debug"
+      ],
       "skipFiles": ["<node_internals>/**"],
       "console": "integratedTerminal"
     },
@@ -26,6 +39,7 @@
       "name": "Playwright: Run All Tests (headed)",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["playwright", "test", "--headed"],
       "skipFiles": ["<node_internals>/**"],
@@ -35,6 +49,7 @@
       "name": "Playwright: Show Trace",
       "type": "node",
       "request": "launch",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["playwright", "show-trace", "${input:tracePath}"],
       "skipFiles": ["<node_internals>/**"],
@@ -42,6 +57,11 @@
     }
   ],
   "inputs": [
+    {
+      "id": "testName",
+      "type": "promptString",
+      "description": "Test name (or part of it) to match, e.g. \"times option\""
+    },
     {
       "id": "tracePath",
       "type": "promptString",

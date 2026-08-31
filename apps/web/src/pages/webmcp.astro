@@ -1,0 +1,114 @@
+---
+/**
+ * WebMCP demo page. Registers browser tools an agent can call, backed by the
+ * same cart the buttons drive, so a tool call and a click end in one state.
+ */
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebMCP cart</title>
+  </head>
+  <body>
+    <main>
+      <h1>WebMCP cart</h1>
+
+      <p data-testid="webmcp-status">checking…</p>
+
+      <ul aria-label="Catalogue">
+        <li>
+          <span>Espresso</span>
+          <button type="button" data-sku="espresso" data-testid="add-espresso">Add Espresso</button>
+        </li>
+        <li>
+          <span>Cold brew</span>
+          <button type="button" data-sku="cold-brew" data-testid="add-cold-brew">Add Cold brew</button>
+        </li>
+      </ul>
+
+      <h2>Cart</h2>
+      <ul data-testid="cart" aria-label="Cart"></ul>
+      <p data-testid="cart-count">0</p>
+    </main>
+
+    <script is:inline>
+      const CATALOGUE = { espresso: 2.5, 'cold-brew': 3.75 };
+      const cart = [];
+
+      function render() {
+        const list = document.querySelector('[data-testid="cart"]');
+        list.replaceChildren(
+          ...cart.map((line) => {
+            const li = document.createElement('li');
+            li.textContent = `${line.qty} x ${line.sku}`;
+            return li;
+          }),
+        );
+        document.querySelector('[data-testid="cart-count"]').textContent = String(
+          cart.reduce((n, line) => n + line.qty, 0),
+        );
+      }
+
+      function addToCart(sku, qty) {
+        if (!(sku in CATALOGUE)) throw new Error(`Unknown SKU: ${sku}`);
+        const line = cart.find((l) => l.sku === sku);
+        if (line) line.qty += qty;
+        else cart.push({ sku, qty });
+        render();
+        return { sku, qty, total: cart.reduce((n, l) => n + l.qty, 0) };
+      }
+
+      for (const button of document.querySelectorAll('button[data-sku]')) {
+        button.addEventListener('click', () => addToCart(button.dataset.sku, 1));
+      }
+
+      const status = document.querySelector('[data-testid="webmcp-status"]');
+
+      // Feature-detect. The page stays usable when the browser has no WebMCP,
+      // which is every browser that has not opted into the trial.
+      if (typeof document.modelContext?.registerTool !== 'function') {
+        status.textContent = 'WebMCP unavailable';
+        status.dataset.webmcp = 'unavailable';
+      } else {
+        Promise.all([
+          document.modelContext.registerTool({
+            name: 'add_to_cart',
+            description: 'Add a quantity of one catalogue item to the cart',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                sku: { type: 'string', enum: Object.keys(CATALOGUE) },
+                qty: { type: 'number', minimum: 1 },
+              },
+              required: ['sku'],
+            },
+            execute: ({ sku, qty }) => JSON.stringify(addToCart(sku, qty ?? 1)),
+          }),
+          document.modelContext.registerTool({
+            name: 'get_cart',
+            description: 'Read the current cart contents and total',
+            inputSchema: { type: 'object', properties: {} },
+            execute: () =>
+              JSON.stringify({
+                lines: cart,
+                total: cart.reduce((n, l) => n + l.qty * CATALOGUE[l.sku], 0),
+              }),
+          }),
+        ]).then(
+          () => {
+            status.textContent = 'WebMCP ready';
+            status.dataset.webmcp = 'ready';
+          },
+          (error) => {
+            status.textContent = `WebMCP registration failed: ${error.message}`;
+            status.dataset.webmcp = 'error';
+          },
+        );
+      }
+
+      render();
+    </script>
+  </body>
+</html>

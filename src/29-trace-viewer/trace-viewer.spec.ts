@@ -8,7 +8,7 @@ test.describe('29-trace-viewer: Reading traces and the show-trace workflow', () 
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
       route.fulfill({
         json: makePerson({
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
           url: 'https://swapi.dev/api/people/1/',
@@ -18,7 +18,7 @@ test.describe('29-trace-viewer: Reading traces and the show-trace workflow', () 
 
     await page.goto('/cards/01');
     await expect(page.getByRole('heading', { name: 'Person' })).toBeVisible();
-    await expect(page.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(page.getByTestId('person-name')).toHaveText('Mocked Luke');
   });
 
   test('deliberate assertion to show what a trace reveals', async ({ page }) => {

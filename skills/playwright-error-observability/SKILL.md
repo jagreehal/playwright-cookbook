@@ -1,11 +1,27 @@
 ---
 name: playwright-error-observability
-description: Make Playwright tests fail on unexpected browser runtime errors, console errors, and critical failed responses. Use when adding console/pageerror guards, auditing false-green tests, or deciding which error signals should be asserted versus allowlisted.
+description: >-
+  Makes Playwright tests fail on unexpected console errors, pageerrors, and
+  critical failed responses. Use this skill when adding guards, auditing
+  false-green tests, or deciding what to allowlist. Do not use for flake
+  diagnosis (playwright-reliability) or network mocking
+  (playwright-network-mocking).
 ---
 
 # Playwright Error Observability
 
 Silent browser errors produce false-green suites. This skill makes runtime failures observable and actionable.
+
+## Critical rules
+
+- Unexpected `console.error` and `pageerror` fail the test.
+- Allowlists are explicit and narrow.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing console listeners, auto-fixtures, and known noisy third parties.
+2. Add a fixture (prefer auto) that collects errors and throws after the test if any unexpected ones fired.
+3. Validate with a spec that triggers a known `console.error` and expect that spec to fail, then with a clean spec that still passes.
 
 ## Non-Negotiables
 
@@ -60,10 +76,7 @@ export const test = base.extend<Fixtures>({
 - Network control: `playwright-network-mocking`
 - CI artifact discipline: `playwright-ci`
 
-## Quick Quality Checklist
+## Validation
 
-- Unexpected `console.error` fails test.
-- Unexpected `pageerror` fails test.
-- Error allowlist is explicit and narrow.
-- Critical response failures are surfaced in assertions.
-- Failure output includes actionable messages.
+- A spec that logs `console.error` fails. A clean spec still passes.
+- The allowlist is explicit and does not swallow unexpected errors.

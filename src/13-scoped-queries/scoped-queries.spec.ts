@@ -8,7 +8,7 @@ test.describe('13-scoped-queries: Scoped queries and selector policy', () => {
     await page.route('**/swapi.dev/api/people/1/**', (route) =>
       route.fulfill({
         json: makePerson({
-          name: 'Luke Skywalker',
+          name: 'Mocked Luke',
           height: '172',
           mass: '77',
           url: 'https://swapi.dev/api/people/1/',
@@ -101,7 +101,7 @@ test.describe('13-scoped-queries: Scoped queries and selector policy', () => {
 
     const card = personCardLocator(page, '1');
     await expect(card).toBeVisible();
-    await expect(card.getByTestId('person-name')).toHaveText('Luke Skywalker');
+    await expect(card.getByTestId('person-name')).toHaveText('Mocked Luke');
     await card.getByRole('button', { name: 'Edit' }).click();
 
     await expect(page.getByRole('dialog', { name: 'Edit person' })).toBeVisible();

@@ -1,11 +1,27 @@
 ---
 name: playwright-ci
-description: Use when setting up Playwright in CI, sharding tests, caching browsers/deps, publishing artifacts, and enforcing quality gates for large suites. Covers deterministic, fast, debuggable CI execution.
+description: >-
+  Sets up Playwright in CI with sharding, artifacts, and quality gates. Use
+  this skill when adding a workflow, caching browsers, publishing reports, or
+  splitting PR vs nightly jobs. Do not use for playwright.config.ts defaults
+  (playwright-config) or tag taxonomy (playwright-projects-tags).
 ---
 
 # Playwright CI
 
 CI proves test quality. Aim for fast feedback and rich failure artifacts, not raw pass rate.
+
+## Critical rules
+
+- Block `test.only` on CI. Retries on CI, zero locally.
+- Blob reports per shard, then merge. Shard once the suite exceeds ~5 minutes.
+- Separate smoke and integration jobs.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing CI config, package manager, how browsers are installed, and current test command.
+2. Apply the baseline policy and workflow shape below, using that package manager and test script.
+3. Validate by running the same command CI will run locally (`npx playwright test --shard=1/2` is enough as a smoke of the flags).
 
 ## Baseline CI Policy
 
@@ -97,10 +113,7 @@ jobs:
 - Flake classification: `playwright-debugging`, `playwright-reliability`
 - Auth bootstrap: `playwright-auth`
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- The workflow uses the project's package manager and test script, not this cookbook's.
+- Locally, `npx playwright test --shard=1/2` (or the project's equivalent) parses and runs.

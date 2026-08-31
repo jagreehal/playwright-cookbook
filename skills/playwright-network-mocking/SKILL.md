@@ -1,6 +1,11 @@
 ---
 name: playwright-network-mocking
-description: Use when controlling network responses in Playwright tests, mocking external APIs (payments, email, third-party SDKs), removing flakes caused by upstream services, recording HAR files for replay, or deciding whether to mock vs. hit a real backend. Make test outcomes depend only on your code, not on the internet.
+description: >-
+  Controls network responses so Playwright tests depend on your code, not the
+  internet. Use this skill when mocking APIs, recording HAR files, or deciding
+  mock vs real backend. Do not use for WebMCP tool doubles
+  (playwright-webmcp) or flake diagnosis after the network is already
+  controlled (playwright-reliability).
 ---
 
 # Playwright Network Mocking
@@ -8,6 +13,18 @@ description: Use when controlling network responses in Playwright tests, mocking
 A test that depends on someone else's server flakes when their server flakes. To fix that, control the network: stub the responses your test needs and let the real ones through where it matters, so an upstream outage never causes a red CI run.
 
 This skill covers `page.route()` (the workhorse), `fulfill` shortcuts, HAR record/replay, and the judgement of when to mock and when not to.
+
+## Critical rules
+
+- Set routes before `page.goto()`. The first request already fired otherwise.
+- Mock third parties by default. Do not mock the thing you are testing.
+- Use `json:` on `fulfill`. Do not stringify by hand.
+
+## Workflow
+
+1. Doctor the consuming repo: find existing `page.route` / HAR usage, which APIs the test hits, and how specs import `test`.
+2. Add or tighten routes for the case at hand. Prefer a fixture for cross-cutting third-party blocks.
+3. Validate with `npx playwright test` on the focused spec. Confirm the mocked URL is not still going to the network (trace or `page.on('request')`).
 
 ## The Workhorse: `page.route()`
 
@@ -233,10 +250,7 @@ Mocking the network gets you most of the way to deterministic tests. The other s
 - Network-driven flake diagnosis: `playwright-reliability`.
 - Setting routes via fixtures cleanly: `playwright-fixtures`.
 
-## Quick Quality Checklist
+## Validation
 
-- Specs do not construct objects directly; fixtures own spec-visible wiring.
-- No sleeps (`waitForTimeout`) used as synchronization.
-- Locators are semantic first (`getByRole`/`getByLabel`) and centralized.
-- Network behavior is intentional: mocked or explicitly integration-tagged.
-- Changes include at least one reproducible command/example.
+- Run `npx playwright test` on the focused spec. Expect a pass with the third party unreachable.
+- Routes are registered before navigation.
