@@ -15,7 +15,8 @@
     "validate:skills": "node scripts/validate-skills.mjs",
     "typecheck": "pnpm --filter playwright-cookbook-web typecheck:i18n",
     "test:webmcp": "playwright test src/42-webmcp-tools --project=chromium",
-    "test:webmcp:native": "playwright test --config=playwright-webmcp-native.config.ts"
+    "test:webmcp:native": "playwright test --config=playwright-webmcp-native.config.ts",
+    "test:webmcp:native:ui": "playwright test --ui --config=playwright-webmcp-native.config.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.3",
