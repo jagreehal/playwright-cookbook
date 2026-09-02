@@ -7,6 +7,7 @@ Astro site that hosts:
   - `/cards/:id` — Same person page, scoped to a card number (e.g. `/cards/01`)
   - `/login` — Login form with username/password fields
   - `/protected` — Dashboard visible after login, shows user info
+  - `/webmcp` — WebMCP cart demo (agent tools + UI share one cart); card docs at `/cards/42`
   - `/docs` — All card READMEs rendered as documentation
 - **Browser JS** at `src/app/app.js` and `src/app/login.js` — vanilla JS the tests drive
 
@@ -41,6 +42,18 @@ Renders SWAPI person data with these test IDs:
 |---------|---------|
 | Heading | `getByRole('heading', { name: 'Dashboard' })` |
 | Message | `getByTestId('dashboard-message')` |
+
+### WebMCP page (`/webmcp`)
+
+Bare agent-ready cart used by card 42. Docs live at `/cards/42`.
+
+| Element | Locator |
+|---------|---------|
+| Status | `getByTestId('webmcp-status')` (`data-webmcp`: `ready` / `unavailable` / `error`) |
+| Add Espresso | `getByTestId('add-espresso')` |
+| Add Cold brew | `getByTestId('add-cold-brew')` |
+| Cart | `getByTestId('cart')` |
+| Cart count | `getByTestId('cart-count')` |
 
 ### Valid credentials
 

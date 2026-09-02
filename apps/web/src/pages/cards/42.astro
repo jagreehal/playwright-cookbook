@@ -1,0 +1,35 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/42-webmcp-tools.mdx';
+import { href } from '../../lib/url';
+
+const cardNumber = '42';
+const cardTitle = 'WebMCP Tools';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Live Demo</h2>
+    <p class="demo-label">
+      👇 The Playwright harness is a bare agent-ready page (no card chrome). Open
+      it to try the cart buttons and the WebMCP tools they share state with:
+    </p>
+    <p>
+      <a href={href('/webmcp')}>Open /webmcp</a>
+    </p>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock
+      language="bash"
+      code={`pnpm test:webmcp            # default lane, no special browser
+pnpm test:webmcp:native     # native lane, needs a Chrome with WebMCP`}
+    />
+  </section>
+</CardLayout>

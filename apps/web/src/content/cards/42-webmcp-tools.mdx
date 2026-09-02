@@ -1,0 +1,28 @@
+# Card 42: WebMCP Tools
+
+The portable agent skill for this pattern is `playwright-webmcp`.
+
+## What This Pattern Solves
+
+[WebMCP](https://github.com/webmachinelearning/webmcp) lets a page hand an agent a set of callable tools. Your page calls `document.modelContext.registerTool()`, and the browser advertises those tools to whatever agent is driving. The page stops being something an agent has to read pixel by pixel and becomes something it can call.
+
+That creates a surface you have to test. Your tool schemas are an API contract now, and a wrong `enum` or a missing `required` sends the agent down a path your buttons never allow. Two problems make it awkward:
+
+1. Bundled Chromium has no WebMCP, so your everyday suite cannot see the API at all.
+2. Chrome ships it behind flags on a moving draft, so a suite pinned to today's behaviour goes stale without telling you.
+
+This card runs two lanes to cover both: a default lane with a `document.modelContext` test double on bundled Chromium, and a native lane against real Chrome with the flags on.
+
+## How It Works
+
+1. **The page owns one state.** `/webmcp` registers `add_to_cart` and `get_cart` against the same cart its buttons drive, then feature-detects so it still works without WebMCP.
+2. **The double is installed before page scripts.** `webmcp-fixture.ts` uses `page.addInitScript()` so the page finds `document.modelContext` the way it would in a WebMCP browser.
+3. **The native lane keeps the double honest.** `.contract.ts` files drive real Chrome through `playwright-webmcp-native.config.ts` and are skipped by the default `pnpm test`.
+
+Drive a tool the way an agent would, then assert on what the user sees. A tool that reports success while the cart stays empty has given the agent a lie, and only the UI check catches it.
+
+## When To Use
+
+- When a page registers WebMCP tools and you want their schemas and handlers covered.
+- When the everyday suite must stay green on machines with no flagged Chrome.
+- Not when you are testing an agent's reasoning about your tools. That needs the agent, not Playwright.

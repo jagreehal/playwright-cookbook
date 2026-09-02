@@ -92,6 +92,7 @@ export const PARTS: CardPart[] = [
       { num: '39', title: 'Test ID Strategy' },
       { num: '40', title: 'shadcn Components' },
       { num: '41', title: 'Type-Safe i18n' },
+      { num: '42', title: 'WebMCP Tools' },
     ],
   },
 ];
