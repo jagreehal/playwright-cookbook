@@ -1,0 +1,28 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/43-premature-pass-races.mdx';
+
+const cardNumber = '43';
+const cardTitle = 'Premature-Pass Races';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Isolated examples</h2>
+    <p class="demo-label">
+      This card builds each race with <code>page.setContent</code> inside the
+      spec — there is no live page to click. Run the tests to see the
+      false-green assertions pass, then the matching fixes.
+    </p>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/43-premature-pass-races" />
+  </section>
+</CardLayout>

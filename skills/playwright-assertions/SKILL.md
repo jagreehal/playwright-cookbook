@@ -18,6 +18,7 @@ This skill covers the model, the catalogue, and the legitimate cases where you d
 
 - Page assertions are `await expect(locator)...`. Never `waitForTimeout`. Never `await locator.isVisible()` inside an `if`.
 - For non-locator conditions, use `expect.poll` (or `toPass`), not a sleep.
+- Auto-wait fixes fail-too-early, not pass-too-early. Absence, hidden, and substring checks settle the moment they first hold — including before the app has done anything.
 
 ## Workflow
 
@@ -50,6 +51,15 @@ await expect(page.getByRole('listitem')).toHaveCount(5);
 await expect(page.getByRole('listitem')).toHaveCount(0);   // empty list
 ```
 
+Absence assertions settle on the first tick where the element is missing — including every tick before the page has rendered it. Wait for a positive landmark that renders in the same pass, then assert absence:
+
+```ts
+await expect(page.getByText('Approved')).toBeVisible();                    // landmark
+await expect(page.getByRole('button', { name: 'Edit' })).toHaveCount(0);   // now meaningful
+```
+
+`not.toBeVisible()` and `toHaveCount(0)` share the race; swapping one for the other fixes nothing.
+
 ### State
 
 ```ts
@@ -71,6 +81,15 @@ await expect(page.getByRole('heading')).toContainText('Welcome');
 await expect(page.getByLabel('Email')).toHaveValue('user@test.dev');
 
 await expect(page.getByRole('listitem')).toHaveText(['Apple', 'Banana', 'Cherry']);
+```
+
+A one-shot `innerText()` plus static `expect` is a snapshot. `toContain` is the usual false green: the stale text already holds the substring.
+
+```ts
+// stale — "Order #1" is on screen before it becomes "Order #1 — paid"
+expect(await page.getByRole('paragraph').innerText()).toContain('Order #1');
+
+await expect(page.getByRole('paragraph')).toHaveText('Order #1 — paid');
 ```
 
 ### Attributes & CSS
@@ -154,14 +173,22 @@ const response = await responsePromise;
 expect(await response.json()).toMatchObject({ id: expect.any(String) });
 ```
 
-Always set up `waitFor*` *before* triggering the action, otherwise you're racing.
+Always set up `waitFor*` *before* triggering the action, otherwise you're racing. When the rendered output does not change (same names after a sort, same count after a filter), the response *is* the done signal. Follow it with a matcher for the DOM write after `json()`:
+
+```ts
+const sorted = page.waitForResponse((r) => r.url().includes('/api/rows?sort=date'));
+await page.getByRole('button', { name: 'Sort by date' }).click();
+await sorted;
+await expect(page.getByRole('list')).toHaveAttribute('data-sort', 'date');
+```
 
 ### Wait for an element to disappear
 
+`toBeHidden()` is already true of a spinner that never started. Assert it appears, then that it clears:
+
 ```ts
-await expect(page.getByRole('progressbar')).toBeHidden();
-// (or)
-await page.getByText('Loading…').waitFor({ state: 'hidden' });
+await expect(page.getByRole('status')).toBeVisible();
+await expect(page.getByRole('status')).toBeHidden();
 ```
 
 ## Soft Assertions
@@ -232,6 +259,9 @@ If you're frequently overriding timeouts, the right answer is usually network mo
 |---|---|---|
 | `await page.waitForTimeout(1000)` | Fixed sleep: slow when nothing's happening, racy when things are slow | `await expect(locator).toBeVisible()` |
 | `expect(await locator.isVisible()).toBe(true)` | One-shot read, not retried | `await expect(locator).toBeVisible()` |
+| `expect(await locator.innerText()).toContain(...)` | Snapshot; the substring is often already true of the stale DOM | `await expect(locator).toHaveText(...)` |
+| `toHaveCount(0)` / `not.toBeVisible()` right after `goto` | Condition is true of the unrendered page | Wait for a same-pass landmark, then assert absence |
+| `toBeHidden()` as the only check after a silent action | Never-started is also hidden | Assert busy/`status` appears, then clears |
 | `if (await locator.isVisible()) { ... }` | Branch on a racy snapshot | Restructure: assert the precondition or use `count() > 0` only when truly conditional |
 | `await page.waitForLoadState('networkidle')` | Vague, slow, often never fires with WebSockets | Wait for the *specific* thing you need with `waitForResponse` or an assertion |
 | `await page.waitForSelector('.foo')` | Old API, encourages CSS selectors | `await expect(page.getByRole(...)).toBeVisible()` |

@@ -37,6 +37,18 @@ const test = base.extend({
 
 **Rule of thumb:** `try/finally` for one-off cleanup in a single test; fixture when the same setup/teardown is needed in more than one test.
 
+## Precheck: prove the seed before you drive the UI
+
+A test that seeds data and then fails on step three tells you nothing about *which* thing broke: the app, or the fixture that was supposed to set it up. Validate the seeded entity's shape before the first UI action and the failure labels itself.
+
+```ts
+const seeded = ClientSchema.parse(await createClient(request, { status: 'active' }));
+// or, when the seed comes back over the wire and you want the failure named:
+expect(ClientSchema.safeParse(seeded), '[precheck] seeded client').toMatchObject({ success: true });
+```
+
+Anything failing with `[precheck]` is a broken test premise, not a regression. That is the first branch of every flake investigation, answered before the investigation starts. Schemas come from Card 08; reuse the same ones the app's API responses are validated against.
+
 ## When to use
 
 - Any test that needs specific data (e.g. a client, an order); avoid building it through the UI.
