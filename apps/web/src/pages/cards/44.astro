@@ -1,0 +1,32 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/44-agentic-mcp-to-ci.mdx';
+import { href } from '../../lib/url';
+
+const cardNumber = '44';
+const cardTitle = 'Agentic MCP → CI';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Demo surface</h2>
+    <p class="demo-label">
+      The committed journey uses the same <code>/login</code> →
+      <code>/protected</code> flow as Card 11. Explore it with Playwright MCP;
+      CI runs only the deterministic spec.
+    </p>
+    <p>
+      <a href={href('/login')}>Open /login</a>
+    </p>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/44-agentic-mcp-to-ci" />
+  </section>
+</CardLayout>
