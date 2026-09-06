@@ -2,7 +2,7 @@
 name: playwright-agentic-testing
 description: >-
   Explore UI goals with a browser agent (Playwright MCP), then commit a
-  deterministic Playwright journey for CI. Use when debugging flakes,
+  deterministic Playwright journey for CI. Use this skill when debugging flakes,
   reproducing production bugs, discovering a path you will encode as a test,
   or deciding whether an agent run belongs in CI. Do not use for testing
   page-registered WebMCP tools (playwright-webmcp), flake diagnosis without
@@ -70,6 +70,13 @@ Prefer fixtures and page objects when the suite already has them.
 - Reproducing a production bug whose steps are incomplete
 
 Not for: every PR, re-checking leaf UI copy, or replacing a green deterministic suite.
+
+## Validation
+
+- Run the committed spec with the project's test script (e.g. `npx playwright test <file>`). Expect a pass with no agent connected.
+- Re-run it twice; a journey that only passes under the agent loop is not committable.
+- Grep the spec for `waitForTimeout`, `page.locator('.')`, and CSS click-chains — none should survive the agent-to-spec translation.
+- Confirm no CI workflow starts Playwright MCP or a shell agent loop.
 
 ## Related skills
 
