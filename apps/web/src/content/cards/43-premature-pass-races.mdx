@@ -1,0 +1,34 @@
+# Card 43: Premature-Pass Races
+
+The portable agent skills for this pattern are `playwright-assertions` and `playwright-reliability`.
+
+## What This Pattern Solves
+
+Auto-waiting fixes the assertions that would otherwise fail too early. It does nothing for the assertions that *pass* too early. Every matcher settles the moment its condition first holds, so any condition that is already true on a half-rendered page is green before the app has done anything at all.
+
+These usually do not flake. They pass in CI for months, and the day the feature breaks they keep passing.
+
+Four shapes cover almost all of them.
+
+| Shape | Why it passes early | Fix |
+|-------|---------------------|-----|
+| Absence (`toHaveCount(0)`, `not.toBeVisible()`) | The element is missing *because the page has not rendered yet* | Wait for a positive landmark first |
+| Silent success (busy already hidden) | You only asserted the end state, which is also the never-started state | Assert busy appears, then clears |
+| Sync read + static `expect` | `innerText()` resolves once; `toContain` matches text that is already on screen | Pass the locator to the matcher, not the string |
+| Re-fetch that renders the same thing | Nothing visible changes, so the matcher matches the *stale* DOM | Register `waitForApi` before the click |
+
+## How It Works
+
+1. **Landmark before absence.** `toHaveCount(0)` is true of Loading. Wait for copy that renders in the same pass, then assert the control is gone.
+2. **Busy must appear, then clear.** A Save that never starts is already hidden. `toBeVisible()` then `toBeHidden()` on `role="status"` fails the broken path and passes the working one.
+3. **Pass the locator, not the string.** `expect(await locator.innerText()).toContain('Order #1')` is true of the unpaid order and the paid one. `toHaveText('Order #1 — paid')` waits.
+4. **Register the network wait first.** When sort returns the same names, no matcher on the list can tell you the new data landed. `waitForApi` is the network done signal; `toHaveAttribute` covers the DOM write after `json()`.
+
+The spec keeps each false-green assertion in its own test, and each fix in another, so leftover in-flight work cannot make the good path look solved.
+
+## When To Use
+
+- Any assertion that something is *not* there.
+- Downloads, autosaves, and other actions with no visible completion.
+- Sort, filter, and pagination controls that re-fetch.
+- Not when you already awaited the action that produces the state — that action's auto-wait covers it.

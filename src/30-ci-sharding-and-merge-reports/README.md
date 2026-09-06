@@ -61,6 +61,36 @@ merge-reports:
         path: playwright-report/
 ```
 
+## Sharding Splits Tests; Projects Split Load Profiles
+
+`--shard` splits by file, blind to what each test costs. One spec that waits 60 seconds on a PDF-generating endpoint lands in a shard with 40 fast specs and sets that machine's wall clock on its own.
+
+Tag the expensive tests and give them their own project, so parallelism is tuned per load profile rather than globally:
+
+```typescript
+projects: [
+  {
+    name: 'light',
+    grepInvert: /@heavy/,
+    workers: process.env.CI ? 5 : 4,   // CPU-bound: match the runner's cores
+    fullyParallel: true,
+  },
+  {
+    name: 'heavy',
+    grep: /@heavy/,
+    workers: 3,        // I/O-bound: stack the waiting, don't fight for CPU
+    fullyParallel: false,
+    timeout: 180_000,  // the slow endpoint needs the room
+  },
+],
+```
+
+Tests that spend their minute waiting on a socket use almost no CPU, so their parallelism is limited by the upstream service, not by cores. Tests that render and assert are CPU-bound and over-parallelise into flake. One `workers` number cannot be right for both.
+
+Pick the numbers by measuring, not by intuition: raise workers a step, run the suite a few times, and watch for the flake rate rising before the wall clock stops falling. On GitHub Actions, `runs-on` is a one-line experiment — comparing a 4-core and an 8-core runner costs one branch and two runs.
+
+The repo's own config uses this shape already, splitting `@visual` into its own project for pinned rendering rather than for load.
+
 ## Run This Example
 
 ```bash
