@@ -1,0 +1,40 @@
+# Card 44: Agentic MCP → CI
+
+The portable agent skill for this pattern is `playwright-agentic-testing`.
+
+## What This Pattern Solves
+
+A browser agent can pursue a **goal** through Playwright MCP. That is useful for
+exploration, flake debugging, and reproducing bugs you cannot fully script yet.
+
+It is a bad fit for high-frequency CI. The durable handoff is: explore with MCP,
+review the path, commit a **deterministic** Playwright test, run that in CI.
+Leave the live agent out of the pipeline.
+
+This card is the committed half of that loop. Card 42 (WebMCP) is different: the
+*page* exposes tools to agents. Here the *agent* drives the browser, then you
+keep a normal test.
+
+## Goal an agent might pursue
+
+```text
+Open /login. Sign in as testuser / password. Land on the dashboard and confirm
+the greeting mentions testuser. Prefer roles and labels over CSS selectors.
+```
+
+## How It Works
+
+1. **MCP explores; CI executes.** The agent session discovers the path. The
+   committed file is the regression gate.
+2. **Review before you keep it.** Rewrite brittle drafts with roles, labels, and
+   web-first assertions (`playwright-architecture`, `playwright-locators`,
+   `playwright-assertions`).
+3. **Do not put the agent loop in CI.** Known paths belong in Playwright tests.
+
+## When To Use
+
+- You used Playwright MCP to find or debug a UI path and want a lasting check.
+- You generate a first draft with an agent and need a pattern for what “done”
+  looks like in the suite.
+- Not when you are testing tools the page registers for agents — that is Card 42.
+- Not when a cheaper tier already owns the claim.

@@ -8,7 +8,7 @@ A workshop-style guide to testing with Playwright, from your first browser test 
 
 The cookbook covers Playwright testing end to end: API mocking, locators and page objects, accessibility, auth, stability, and fixture composition.
 
-- **Progressive**: 44 cards ordered simple to complex, each building on the last.
+- **Progressive**: 45 cards ordered simple to complex, each building on the last.
 - **Workshop tested**: Follows the pedagogy of real Playwright training.
 - **Runs for real**: Every pattern runs against the demo Astro app and passes in CI.
 - **Reference quality**: Jump to any card for a self-contained pattern.
@@ -19,7 +19,7 @@ The mocking cards (02-10) use `page.route()` and `context.route()` to intercept 
 
 [![skills.sh](https://skills.sh/b/jagreehal/playwright-cookbook)](https://skills.sh/jagreehal/playwright-cookbook)
 
-This cookbook ships the patterns as **agent skills** — reusable capabilities that give an AI agent procedural knowledge for writing maintainable Playwright suites. The 24 skills under [`skills/`](./skills) work in **any Playwright repo**. You do not need to clone this cookbook to use them. Index and install notes: [`skills/README.md`](./skills/README.md). Contributor contract: [`docs/skill-catalog.md`](./docs/skill-catalog.md).
+This cookbook ships the patterns as **agent skills** — reusable capabilities that give an AI agent procedural knowledge for writing maintainable Playwright suites. The 25 skills under [`skills/`](./skills) work in **any Playwright repo**. You do not need to clone this cookbook to use them. Index and install notes: [`skills/README.md`](./skills/README.md). Contributor contract: [`docs/skill-catalog.md`](./docs/skill-catalog.md).
 
 ### Install
 
@@ -62,6 +62,8 @@ Navigate to https://demo.playwright.dev/todomvc and add a few todo items.
 
 Pair MCP with the [skills pack](#skills) above — skills teach conventions; MCP lets the agent drive a real browser while you work through the cards.
 
+When an agent finds a path worth keeping, commit a deterministic Playwright test and leave the live loop out of CI. That handoff is [Card 44](./src/44-agentic-mcp-to-ci/README.md) and the `playwright-agentic-testing` skill. Card 42 (WebMCP) is the other direction: tools the *page* exposes to agents.
+
 ## Quick Start
 
 ```bash
@@ -97,7 +99,7 @@ pnpm lint
 2. Master **Cards 03-10** (API mocking techniques)
 3. Learn **Cards 11-15** (page interactions + patterns)
 4. Explore **Cards 16-26** (production patterns + architecture)
-5. Advance to **Cards 27-43** (visual regression, component testing, CI, HAR, mobile, multi-context, executable stories, premature-pass races)
+5. Advance to **Cards 27-44** (visual regression, component testing, CI, HAR, mobile, multi-context, executable stories, premature-pass races, agentic MCP → CI)
 
 **Experienced tester?** Jump to specific patterns:
 - Need auth? → Card 19 (Storage State)
@@ -105,6 +107,7 @@ pnpm lint
 - Need architecture? → Card 26 (Full Architecture), built on Card 12 (Locators-Actions-Flows)
 - Need debugging? → Card 16 (Unhandled Requests)
 - Assertion goes green before the app has rendered? → Card 43 (Premature-Pass Races)
+- Agent explored a path via MCP — keep a CI test? → Card 44 (Agentic MCP → CI)
 
 ## How It's Structured
 
@@ -227,7 +230,7 @@ pnpm lint --fix    # Auto-fix fixable issues
 |------|-------|----------------|
 | [26-full-architecture](./src/26-full-architecture/README.md) | Fixture composition root | One `fixtures.ts`, page objects own their components, lazy + auto fixtures |
 
-### Part 8: Advanced Playwright Patterns (27-43)
+### Part 8: Advanced Playwright Patterns (27-44)
 *Beyond the basics: the full Playwright toolkit*
 
 | Card | Topic | What You Learn |
@@ -249,6 +252,7 @@ pnpm lint --fix    # Auto-fix fixable issues
 | [41-i18n-typesafe](./src/41-i18n-typesafe/README.md) | Type-safe i18next, tested by the translated name | `CustomTypeOptions`, `tsc` gate, select by shared translation source, language switch, JSON import attributes |
 | [42-webmcp-tools](./src/42-webmcp-tools/README.md) | Testing a page that exposes WebMCP tools to agents | `document.modelContext`, `addInitScript` double, real-Chrome native lane, feature detection, tool schemas |
 | [43-premature-pass-races](./src/43-premature-pass-races/README.md) | Assertions that go green before the app has rendered | Landmark before absence, busy appear→disappear, sync read vs matcher, re-fetch done signal |
+| [44-agentic-mcp-to-ci](./src/44-agentic-mcp-to-ci/README.md) | MCP explores a goal; CI runs a committed journey | Goal → review → deterministic Playwright test; not live agents in CI |
 
 ## Quick Reference
 
@@ -283,6 +287,7 @@ pnpm lint --fix    # Auto-fix fixable issues
 | Set up per-role auth in CI | 37 (Global Setup & Teardown) |
 | Generate living docs from tests | 38 (Executable Stories) |
 | Catch an assertion that passes before the app has rendered | 43 (Premature-Pass Races) |
+| Turn an MCP exploration into a CI journey | 44 (Agentic MCP → CI) |
 
 ## Tech Stack
 
@@ -319,4 +324,4 @@ MIT
 
 ---
 
-**Pro tip**: Run cards 01-11 in order for a complete workshop (about two hours). You go from zero to writing Playwright tests with API mocking, page interactions, and the first architecture patterns. Cards 27-43 fill in every remaining Playwright feature needed for production suites.
+**Pro tip**: Run cards 01-11 in order for a complete workshop (about two hours). You go from zero to writing Playwright tests with API mocking, page interactions, and the first architecture patterns. Cards 27-44 fill in every remaining Playwright feature needed for production suites.
