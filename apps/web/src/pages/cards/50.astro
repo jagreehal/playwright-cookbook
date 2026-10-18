@@ -1,0 +1,28 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/50-clock-control.mdx';
+
+const cardNumber = '50';
+const cardTitle = 'Clock Control';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Isolated examples</h2>
+    <p class="demo-label">
+      This card builds each page with <code>page.setContent</code> inside the
+      spec, so there is no live page to click. Run the tests to see each
+      pattern.
+    </p>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/50-clock-control" />
+  </section>
+</CardLayout>

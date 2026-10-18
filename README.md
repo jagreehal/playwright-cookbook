@@ -4,11 +4,12 @@
 
 A workshop-style guide to testing with Playwright, from your first browser test to a composed architecture for large suites. Every card ships with runnable code and a README.
 
+
 ## Why This Cookbook?
 
 The cookbook covers Playwright testing end to end: API mocking, locators and page objects, accessibility, auth, stability, and fixture composition.
 
-- **Progressive**: 45 cards ordered simple to complex, each building on the last.
+- **Progressive**: 51 cards ordered simple to complex, each building on the last.
 - **Workshop tested**: Follows the pedagogy of real Playwright training.
 - **Runs for real**: Every pattern runs against the demo Astro app and passes in CI.
 - **Reference quality**: Jump to any card for a self-contained pattern.
@@ -19,7 +20,7 @@ The mocking cards (02-10) use `page.route()` and `context.route()` to intercept 
 
 [![skills.sh](https://skills.sh/b/jagreehal/playwright-cookbook)](https://skills.sh/jagreehal/playwright-cookbook)
 
-This cookbook ships the patterns as **agent skills** — reusable capabilities that give an AI agent procedural knowledge for writing maintainable Playwright suites. The 25 skills under [`skills/`](./skills) work in **any Playwright repo**. You do not need to clone this cookbook to use them. Index and install notes: [`skills/README.md`](./skills/README.md). Contributor contract: [`docs/skill-catalog.md`](./docs/skill-catalog.md).
+This cookbook ships the patterns as **agent skills**: reusable capabilities that give an AI agent procedural knowledge for writing maintainable Playwright suites. The 26 skills under [`skills/`](./skills) work in **any Playwright repo**. You do not need to clone this cookbook to use them. Index and install notes: [`skills/README.md`](./skills/README.md). Contributor contract: [`docs/skill-catalog.md`](./docs/skill-catalog.md).
 
 ### Install
 
@@ -88,7 +89,7 @@ pnpm test:debug src/01-first-browser-test
 # Run UI mode (visual test explorer)
 pnpm test:watch
 
-# Lint all test files (ESLint + Playwright plugin)
+# Lint with oxlint (Playwright rules + type-aware async checks)
 pnpm lint
 ```
 
@@ -100,6 +101,7 @@ pnpm lint
 3. Learn **Cards 11-15** (page interactions + patterns)
 4. Explore **Cards 16-26** (production patterns + architecture)
 5. Advance to **Cards 27-44** (visual regression, component testing, CI, HAR, mobile, multi-context, executable stories, premature-pass races, agentic MCP → CI)
+6. Fill in the interaction toolkit with **Cards 45-50** (form controls, dialogs, frames and shadow DOM, keyboard and drag, tables, clock)
 
 **Experienced tester?** Jump to specific patterns:
 - Need auth? → Card 19 (Storage State)
@@ -108,6 +110,7 @@ pnpm lint
 - Need debugging? → Card 16 (Unhandled Requests)
 - Assertion goes green before the app has rendered? → Card 43 (Premature-Pass Races)
 - Agent explored a path via MCP — keep a CI test? → Card 44 (Agentic MCP → CI)
+- Test waits on a real timer or debounce? → Card 50 (Clock Control)
 
 ## How It's Structured
 
@@ -145,19 +148,16 @@ Several debugging tools are pre-configured:
 
 See cards **16** (debug unhandled requests), **22** (failure artifacts), and **29** (trace viewer) for deeper dives.
 
-## ESLint
+## Linting and type checking
 
-The project ships with a strict ESLint setup combining these presets:
+[Oxlint](https://oxc.rs/docs/guide/usage/linter) lints the repo with its `correctness` rules, plus `eslint-plugin-playwright`'s recommended rules loaded as a JS plugin on spec files. The config lives in [`.oxlintrc.json`](./.oxlintrc.json).
 
-- `eslint:recommended` — core JavaScript best practices
-- `@typescript-eslint/recommended` — TypeScript-aware rules
-- `playwright/recommended` — Playwright-specific rules (async safety, locator preferences, test structure)
-
-Type-aware rules (`no-floating-promises`, `no-misused-promises`) are enabled on spec files to catch unawaited Playwright actions at lint time — the same mistakes that cause flaky tests.
+`--type-aware` turns on `no-floating-promises` and `no-misused-promises`. They catch an unawaited Playwright action at lint time, the same mistake that makes a test flaky. Type-aware rules run on `oxlint-tsgolint`, which uses the TypeScript 7 native compiler. `pnpm typecheck` runs that compiler (`tsc`) too.
 
 ```bash
-pnpm lint          # Run ESLint
-pnpm lint --fix    # Auto-fix fixable issues
+pnpm lint          # oxlint --type-aware
+pnpm lint --fix    # apply safe fixes
+pnpm typecheck     # tsc (TypeScript 7) + the i18n key gate
 ```
 
 ## Cards (Table of Contents)
@@ -254,6 +254,18 @@ pnpm lint --fix    # Auto-fix fixable issues
 | [43-premature-pass-races](./src/43-premature-pass-races/README.md) | Assertions that go green before the app has rendered | Landmark before absence, busy appear→disappear, sync read vs matcher, re-fetch done signal |
 | [44-agentic-mcp-to-ci](./src/44-agentic-mcp-to-ci/README.md) | MCP explores a goal; CI runs a committed journey | Goal → review → deterministic Playwright test; not live agents in CI |
 
+### Part 9: Interaction Toolkit (45-50)
+*The controls, dialogs, frames and timers a real UI throws at you.*
+
+| Card | Topic | What You Learn |
+|------|-------|----------------|
+| [45-native-form-controls](./src/45-native-form-controls/README.md) | Inputs, checkboxes, radios, selects, hover, click variants | `fill` vs `pressSequentially`, `check`/`setChecked`, `selectOption`, `dblclick`, validation via `toHaveAccessibleDescription` |
+| [46-browser-dialogs](./src/46-browser-dialogs/README.md) | alert, confirm, prompt, beforeunload | `page.once('dialog')`, auto-dismiss default, `accept(text)`, `runBeforeUnload` |
+| [47-frames-and-shadow-dom](./src/47-frames-and-shadow-dom/README.md) | Iframes, nested frames, shadow roots | `frameLocator`, `contentFrame()`, `page.frame({ url })`, open vs closed shadow roots |
+| [48-keyboard-mouse-drag](./src/48-keyboard-mouse-drag/README.md) | Shortcuts, focus order, drag and drop | `press('ControlOrMeta+A')`, `toBeFocused`, `dragTo`, manual `mouse` steps |
+| [49-tables-and-grids](./src/49-tables-and-grids/README.md) | Rows, cells, sorting, pagination | Row filters with `has`/`hasText`, `toHaveText([...])` for order, why `nth()` breaks |
+| [50-clock-control](./src/50-clock-control/README.md) | Timers, debounce, countdowns, session timeout | `page.clock.install`, `fastForward`, `runFor`, `pauseAt`, `setFixedTime` |
+
 ## Quick Reference
 
 **Problem → Solution**
@@ -288,12 +300,17 @@ pnpm lint --fix    # Auto-fix fixable issues
 | Generate living docs from tests | 38 (Executable Stories) |
 | Catch an assertion that passes before the app has rendered | 43 (Premature-Pass Races) |
 | Turn an MCP exploration into a CI journey | 44 (Agentic MCP → CI) |
+| Handle alert / confirm / prompt | 46 (Browser Dialogs) |
+| Reach a control inside an iframe or shadow root | 47 (Frames & Shadow DOM) |
+| Assert table sort order | 49 (Tables & Grids) |
+| Test a timer without sleeping | 50 (Clock Control) |
 
 ## Tech Stack
 
 - **Playwright Test** – Browser automation and test runner
 - **TypeScript** – Type-safe tests and shared utilities
-- **ESLint** – Linting with `eslint-plugin-playwright`, `typescript-eslint`, and type-aware async safety rules
+- **Oxlint** – Linting with `eslint-plugin-playwright` as a JS plugin and type-aware async safety rules on `oxlint-tsgolint`
+- **TypeScript 7** – The native (Go) compiler for `pnpm typecheck`
 - **Astro** – Demo application (docs + person/login pages)
 - **Zod** – Runtime schema validation (Card 08)
 - **Faker** – Synthetic data generation (Card 09)
@@ -324,4 +341,4 @@ MIT
 
 ---
 
-**Pro tip**: Run cards 01-11 in order for a complete workshop (about two hours). You go from zero to writing Playwright tests with API mocking, page interactions, and the first architecture patterns. Cards 27-44 fill in every remaining Playwright feature needed for production suites.
+**Pro tip**: Run cards 01-11 in order for a complete workshop (about two hours). You go from zero to writing Playwright tests with API mocking, page interactions, and the first architecture patterns. Cards 27-50 cover the rest of the Playwright features a production suite needs.

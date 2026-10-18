@@ -1,0 +1,61 @@
+# Card 50: Clock Control
+
+The portable agent skill for this pattern is `playwright-interactions`.
+
+## What This Pattern Solves
+
+Session timeouts, countdowns, debounced search, "posted 3 minutes ago", and holiday banners all depend on time. Tests that wait for real time are slow, and tests that guess with `waitForTimeout` flake on a busy runner. Tests that read `new Date()` pass in December and fail in January. `page.clock` gives the test control of time inside the page.
+
+## How It Works
+
+1. **`page.clock.install()`** replaces `Date`, `setTimeout`, `setInterval`, `requestAnimationFrame`, and `performance.now` in the page. Call it before `goto` or `setContent` so the page's scripts see the fake clock.
+2. **Time still flows after `install()`** at real speed. Call `pauseAt(time)` when the test counts ticks, so nothing fires between your steps.
+3. **`fastForward(ms)`** jumps ahead and fires due timers once. Use it for long timeouts.
+4. **`runFor(ms)`** advances step by step and fires every timer in the window. Use it for intervals and debounce.
+5. **`setFixedTime(date)`** pins `Date.now()` and leaves timers running. Use it for date-dependent rendering.
+
+## Code Example
+
+```typescript
+// Session timeout: install before the page loads
+await page.clock.install();
+await page.goto('/account');
+
+// Bad: 15 real minutes, or a shorter guess that flakes
+// await page.waitForTimeout(15 * 60_000);
+
+// Good: move the fake clock
+await page.clock.fastForward('15:00');
+await expect(page.getByRole('status')).toHaveText('Session expired');
+
+// Debounce, in its own test: pause first so real time cannot fire the timer
+const T0 = new Date('2026-01-01T00:00:00Z');
+await page.clock.install({ time: T0 });
+await page.clock.pauseAt(T0);
+const search = page.getByLabel('Search');
+const searches = page.locator('output');
+await search.pressSequentially('pl');
+await page.clock.runFor(200);          // pause shorter than the 300ms delay
+await search.pressSequentially('ay');  // must restart the timer
+await page.clock.runFor(299);
+await expect(searches).toHaveText('0');
+await page.clock.runFor(1);            // 300ms after the last keystroke
+await expect(searches).toHaveText('1');
+
+// Date-dependent UI
+await page.clock.setFixedTime(new Date('2026-12-25T09:00:00Z'));
+```
+
+## When To Use
+
+- ✓ Session timeouts, inactivity logouts, token refresh.
+- ✓ Countdowns, OTP resend timers, auto-dismissing toasts.
+- ✓ Debounce and throttle.
+- ✓ Relative dates and date-dependent banners.
+- ✗ Server-side time. The fake clock lives in the browser; mock the API response (Card 02) for server dates.
+- ✗ CSS animations and transitions. Use `reducedMotion: 'reduce'` or wait on the end state.
+
+## Related Patterns
+
+- **Previous**: Card 49 (Tables & Grids).
+- **Complementary**: Card 18 (Stability Techniques), Card 34 (Retries & Soft Assertions), Card 43 (Premature-Pass Races).

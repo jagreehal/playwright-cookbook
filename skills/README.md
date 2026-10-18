@@ -45,5 +45,6 @@ Start with **playwright-architecture** if the suite has no convention yet.
 | `playwright-shadcn` | Named-role tests for shadcn/base-ui |
 | `playwright-webmcp` | Two-lane tests for `document.modelContext` tools |
 | `playwright-agentic-testing` | MCP goal explore → commit deterministic CI journey |
+| `playwright-interactions` | Form controls, dialogs, frames, keyboard, drag, tables, `page.clock` |
 | `playwright-executable-stories` | Living docs from real tests |
 | `build-tested-components` | Co-design accessible markup with its tests |

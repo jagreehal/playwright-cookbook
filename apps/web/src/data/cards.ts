@@ -97,6 +97,19 @@ export const PARTS: CardPart[] = [
       { num: '44', title: 'Agentic MCP → CI' },
     ],
   },
+  {
+    part: '09',
+    title: 'Interaction Toolkit',
+    summary: 'Drive the controls, dialogs, frames and timers a real UI throws at you.',
+    cards: [
+      { num: '45', title: 'Native Form Controls' },
+      { num: '46', title: 'Browser Dialogs' },
+      { num: '47', title: 'Frames & Shadow DOM' },
+      { num: '48', title: 'Keyboard, Mouse & Drag' },
+      { num: '49', title: 'Tables & Grids' },
+      { num: '50', title: 'Clock Control' },
+    ],
+  },
 ];
 
 /** Flat, ordered list of every card. */

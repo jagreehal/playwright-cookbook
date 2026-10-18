@@ -1,0 +1,57 @@
+# Card 46: Browser Dialogs
+
+The portable agent skills for this pattern are `playwright-interactions` and `playwright-assertions`.
+
+## What This Pattern Solves
+
+`alert()`, `confirm()`, `prompt()` and `beforeunload` open native dialogs that block the page's JavaScript until someone answers. A role locator cannot find them because they live outside the DOM. When no listener is registered, Playwright dismisses every dialog for you. The test keeps running, `confirm()` returns `false`, and the app takes its cancel path while you think you tested the happy path.
+
+## How It Works
+
+1. **Register before the trigger**: `page.once('dialog', handler)` before the click that opens the dialog.
+2. **Inspect**: `dialog.type()` is `alert`, `confirm`, `prompt` or `beforeunload`. `dialog.message()` is the text. `dialog.defaultValue()` is a prompt's prefilled value.
+3. **Answer**: `dialog.accept()`, `dialog.accept(text)` for a prompt, or `dialog.dismiss()`.
+4. **Assert the outcome on the page**: the dialog only proves it appeared. The status text proves the app acted on the answer.
+
+## Code Example
+
+```typescript
+// Bad: no listener. Playwright dismisses, confirm() returns false.
+await page.getByRole('button', { name: 'Delete account' }).click();
+await expect(page.getByRole('status')).toHaveText('Kept');
+
+// Good: record and answer the next dialog, then assert after the click.
+let message = '';
+page.once('dialog', async (dialog) => {
+  message = dialog.message();
+  await dialog.accept();
+});
+await page.getByRole('button', { name: 'Delete account' }).click();
+await expect(page.getByRole('status')).toHaveText('Deleted');
+expect(message).toBe('Delete your account?');
+
+// prompt: accept with a value
+page.once('dialog', (dialog) => dialog.accept('Quarterly report'));
+```
+
+## Key Concepts
+
+- **Auto-dismiss default**: With no `dialog` listener, Playwright calls `dismiss()`. `alert` closes, `confirm` returns `false`, `prompt` returns `null`.
+- **`page.once` vs `page.on`**: `once` answers one dialog and removes itself. `on` answers every dialog until the page closes, which suits a flow with several dialogs of the same kind.
+- **A listener must answer**: Once you register a handler, Playwright stops auto-dismissing. A handler that never calls `accept` or `dismiss` leaves the page frozen and the next action times out.
+- **`beforeunload`**: `page.close()` skips it. Pass `{ runBeforeUnload: true }` to fire it. Chromium shows the dialog only after a user gesture on the page.
+- **`dialog.accept()` on `beforeunload`**: Leaves the page. `dismiss()` stays.
+
+## When to Use This Pattern
+
+- ✓ Delete or discard flows guarded by `confirm()`.
+- ✓ Legacy rename flows using `prompt()`.
+- ✓ "You have unsaved changes" guards on `beforeunload`.
+- ✗ In-page modals built with `<dialog>` or `role="dialog"`. Those are DOM; use `getByRole('dialog')` (Card 14, Card 40).
+- ✗ Popup windows opened with `window.open` (Card 35).
+
+## Related Patterns
+
+- **Previous**: Card 45 (Native Form Controls).
+- **Next**: Card 47 (Frames & Shadow DOM).
+- **Complementary**: Card 35 (Multi-Tab & Multi-Context) for popup windows, Card 40 (shadcn Components) for in-page dialogs.

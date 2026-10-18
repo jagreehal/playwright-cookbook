@@ -87,3 +87,4 @@ test.describe('44-agentic-mcp-to-ci: committed journey after MCP explore', () =>
 - Card 42 (WebMCP Tools) — page→agent API contract, not agent→browser execution
 - Card 21 / 26 — AppDriver and full architecture once journeys grow
 - Skills: `playwright-agentic-testing`, `playwright-architecture`, `playwright-debugging`
+- Next: Card 45 (Native Form Controls)

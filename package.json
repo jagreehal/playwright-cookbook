@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A workshop-style guide to testing with Playwright, from your first browser test to a composed architecture for large suites",
   "type": "module",
-  "packageManager": "pnpm@11.5.3",
+  "packageManager": "pnpm@12.14.0",
   "scripts": {
     "test": "playwright test",
     "test:watch": "playwright test --ui --project=chromium",
@@ -11,28 +11,26 @@
     "test:debug": "PWDEBUG=1 playwright test",
     "test:record": "RECORD_FIXTURES=1 playwright test",
     "dev:web": "pnpm --filter playwright-cookbook-web dev",
-    "lint": "eslint .",
+    "lint": "oxlint --type-aware",
     "validate:skills": "node scripts/validate-skills.mjs",
-    "typecheck": "pnpm --filter playwright-cookbook-web typecheck:i18n",
+    "typecheck": "tsc && pnpm --filter playwright-cookbook-web typecheck:i18n",
     "test:webmcp": "playwright test src/42-webmcp-tools --project=chromium",
     "test:webmcp:native": "playwright test --config=playwright-webmcp-native.config.ts",
     "test:webmcp:native:ui": "playwright test --ui --config=playwright-webmcp-native.config.ts"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.11.3",
-    "@eslint/js": "10.0.1",
-    "@faker-js/faker": "10.4.0",
-    "@playwright/test": "1.60.0",
-    "@types/node": "25.9.1",
-    "eslint": "10.4.1",
-    "eslint-plugin-playwright": "2.10.4",
-    "executable-stories-playwright": "8.4.4",
-    "globals": "17.6.0",
+    "@axe-core/playwright": "4.14.0",
+    "@faker-js/faker": "10.6.0",
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "eslint-plugin-playwright": "2.12.1",
+    "executable-stories-playwright": "8.13.0",
+    "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2004",
     "serve": "14.2.6",
-    "typescript": "5.9.3",
-    "typescript-eslint": "8.60.1"
+    "typescript": "7.0.2"
   },
   "dependencies": {
-    "zod": "4.4.3"
+    "zod": "4.6.7"
   }
 }

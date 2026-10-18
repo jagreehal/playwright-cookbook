@@ -58,8 +58,12 @@ function LoginGood({ onSubmit }: { onSubmit?: (c: Credentials) => void }) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const data = new FormData(event.currentTarget)
-    const email = String(data.get("email") ?? "")
-    const password = String(data.get("password") ?? "")
+    const field = (name: string) => {
+      const value = data.get(name)
+      return typeof value === "string" ? value : ""
+    }
+    const email = field("email")
+    const password = field("password")
     if (!email || !password) {
       setError("Enter your email and password.")
       return
