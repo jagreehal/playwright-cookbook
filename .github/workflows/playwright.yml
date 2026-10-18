@@ -19,7 +19,7 @@ jobs:
   # Gate the type-safe i18n setup: a t() key that is not in the locale JSON, or
   # a bad-key directive that stops erroring, fails this check (card 41).
   typecheck:
-    name: Typecheck (i18n)
+    name: Typecheck & lint
     runs-on: ubuntu-latest
     if: >-
       github.event_name != 'pull_request' ||
@@ -31,8 +31,10 @@ jobs:
           node-version: 24
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
-      - name: Typecheck i18n
+      - name: Typecheck
         run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
       - name: Validate skills pack
         run: pnpm validate:skills
 

@@ -3,8 +3,10 @@
   "compilerOptions": {
     "noEmit": true,
     "types": [],
-    "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] }
+    // TS 7 checks side-effect imports by default; this config has no Vite
+    // types, so the component's CSS import would fail to resolve.
+    "noUncheckedSideEffectImports": false,
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": [
     "src/i18n/**/*.ts",

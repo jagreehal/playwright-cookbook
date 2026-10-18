@@ -16,7 +16,7 @@ export const resources = {
   fr: { common: frCommon, navigation: frNavigation },
 } as const;
 
-i18n.use(initReactI18next).init({
+void i18n.use(initReactI18next).init({
   resources,
   lng: 'en',
   fallbackLng: 'en',

@@ -1,0 +1,26 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/47-frames-and-shadow-dom.mdx';
+
+const cardNumber = '47';
+const cardTitle = 'Frames & Shadow DOM';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Isolated examples</h2>
+    <p class="demo-label">
+      The spec serves frame documents with <code>page.route</code> and builds shadow roots inline. Run the tests to see each boundary crossed.
+    </p>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/47-frames-and-shadow-dom" />
+  </section>
+</CardLayout>

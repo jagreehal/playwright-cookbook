@@ -1,0 +1,26 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/45-native-form-controls.mdx';
+
+const cardNumber = '45';
+const cardTitle = 'Native Form Controls';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Isolated examples</h2>
+    <p class="demo-label">
+      Each control is built with <code>page.setContent</code> inside the spec. Run the tests to see each action paired with its matcher.
+    </p>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/45-native-form-controls" />
+  </section>
+</CardLayout>

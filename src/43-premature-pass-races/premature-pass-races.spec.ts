@@ -104,6 +104,7 @@ test.describe('43-premature-pass-races: assertions that pass before the app does
     // toContain passes against the unpaid order and the paid one alike.
     expect(await status.innerText()).toContain('Order #1'); // green, and wrong
     // …and here is the proof it was a lie:
+    // oxlint-disable-next-line playwright/prefer-web-first-assertions -- the sync read is the lesson
     expect(await status.innerText()).toBe('Order #1');
 
     // Good: the matcher takes the locator, not a string, so it re-reads until
@@ -121,6 +122,7 @@ test.describe('43-premature-pass-races: assertions that pass before the app does
 
     await page.getByRole('button', { name: 'Sort by date' }).click();
     await expect(page.getByRole('listitem')).toHaveText(['Ada', 'Grace']); // green either way
+    // oxlint-disable-next-line playwright/prefer-web-first-assertions -- the sync read is the lesson
     expect(await page.getByRole('list').getAttribute('data-sort')).toBe('name'); // still the old data
   });
 

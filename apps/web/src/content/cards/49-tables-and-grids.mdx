@@ -1,0 +1,54 @@
+# Card 49: Tables & Grids
+
+The portable agent skill for this pattern is `playwright-interactions`.
+
+## What This Pattern Solves
+
+Tables repeat the same controls on every row: three Delete buttons, three Edit links, cells that share text. A test that picks "the third row" works until someone sorts the table, adds a fixture, or changes the page size. Then it deletes the wrong user and still passes. Tables also change order after a sort, so a test that reads cells once can check the old order.
+
+## How It Works
+
+1. **Roles first.** `<table>`, `<tr>`, `<th>`, and `<td>` map to the `table`, `row`, `columnheader`, and `cell` roles. Give the table an accessible name and scope everything under it.
+2. **Identify a row by its data.** `rows.filter({ hasText: 'Kai' })` matches any row containing the text. `rows.filter({ has: page.getByRole('cell', { name: 'Remy', exact: true }) })` matches a row with that exact cell, which avoids "Remy" matching "Remya".
+3. **Act inside the row.** Chain `.getByRole('button', { name: 'Delete' })` from the filtered row so the action cannot hit a neighbour.
+4. **Assert order with `toHaveText([...])`.** The array form checks every element, in order, and retries until the sort lands.
+5. **Paginate with a landmark.** Assert the page indicator changed before you assert the rows.
+
+## Code Example
+
+```typescript
+const table = page.getByRole('table', { name: 'Users' });
+const rows = table.getByRole('row');
+const firstColumn = rows.locator('td:first-child');
+
+// Headers in order
+await expect(table.getByRole('columnheader')).toHaveText(['Name', 'Role', 'Actions']);
+
+// Bad: index 3 is Remy until the table sorts
+await rows.nth(3).getByRole('button', { name: 'Delete' }).click();
+
+// Good: name the row by the data that identifies it
+await rows
+  .filter({ has: page.getByRole('cell', { name: 'Remy', exact: true }) })
+  .getByRole('button', { name: 'Delete' })
+  .click();
+
+// Bad: reads once, before an async sort finishes
+expect(await firstColumn.allTextContents()).toEqual(['Kai', 'Nova', 'Remy']);
+// Good: retries until every cell matches in order
+await expect(firstColumn).toHaveText(['Kai', 'Nova', 'Remy']);
+```
+
+## When To Use
+
+- ✓ Row actions such as edit, delete, and approve.
+- ✓ Sorting, filtering, and pagination.
+- ✓ Data grids built from `<div role="grid">` with `row` and `gridcell` roles.
+- ✗ Virtualised grids with thousands of rows. Filter or search to the row first, since off-screen rows are not in the DOM.
+- ✗ Canvas-rendered grids. They expose no roles, so test through the app's API or a test id on the container.
+
+## Related Patterns
+
+- **Previous**: Card 48 (Keyboard, Mouse & Drag).
+- **Next**: Card 50 (Clock Control).
+- **Complementary**: Card 14 (Region Objects), for wrapping a table in a page object; Card 43 (Premature-Pass Races), for the `toHaveCount(0)` trap after a delete.

@@ -1,0 +1,26 @@
+---
+import CardLayout from '../../layouts/CardLayout.astro';
+import CodeBlock from '../../components/shared/CodeBlock.astro';
+import ReadmeContent from '../../content/cards/46-browser-dialogs.mdx';
+
+const cardNumber = '46';
+const cardTitle = 'Browser Dialogs';
+---
+
+<CardLayout title={cardTitle} cardNumber={cardNumber}>
+  <section class="readme">
+    <ReadmeContent />
+  </section>
+
+  <section class="demo">
+    <h2>Isolated examples</h2>
+    <p class="demo-label">
+      The spec builds its dialog page with <code>page.setContent</code>. Run the tests to see the auto-dismiss trap, then each dialog handled.
+    </p>
+  </section>
+
+  <section class="test-info">
+    <h2>Run This Example</h2>
+    <CodeBlock language="bash" code="pnpm test src/46-browser-dialogs" />
+  </section>
+</CardLayout>
