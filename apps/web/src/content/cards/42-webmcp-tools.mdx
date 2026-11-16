@@ -4,7 +4,7 @@ The portable agent skill for this pattern is `playwright-webmcp`.
 
 ## What This Pattern Solves
 
-[WebMCP](https://github.com/webmachinelearning/webmcp) lets a page hand an agent a set of callable tools. Your page calls `document.modelContext.registerTool()`, and the browser advertises those tools to whatever agent is driving. The page stops being something an agent has to read pixel by pixel and becomes something it can call.
+WebMCP lets a page hand an agent a set of callable tools. Your page calls `document.modelContext.registerTool()`, and the browser advertises those tools to whatever agent is driving. The page stops being something an agent has to read pixel by pixel and becomes something it can call.
 
 That creates a surface you have to test. Your tool schemas are an API contract now, and a wrong `enum` or a missing `required` sends the agent down a path your buttons never allow. Two problems make it awkward:
 

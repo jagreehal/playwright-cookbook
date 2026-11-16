@@ -116,6 +116,7 @@ pnpm test src/22-failure-artifacts
 - **testInfo.attach()**: Adds an arbitrary artifact (text, JSON, binary) to the test result. Visible in the HTML report under the "Attachments" section. Name it descriptively (`page-errors`, `network-requests`, `api-responses`).
 - **Conditional attachment**: Only attach errors when `testInfo.status !== 'passed'`. Passing tests don't need the noise; failing ones get maximum diagnostic data.
 - **trace/screenshot/video config**: Set in `playwright.config.ts` under `use:`. `on-first-retry` means artifacts are only captured on retries (not first attempt), keeping CI fast for passing suites. `only-on-failure` captures only when the test fails.
+- **`page.consoleMessages()` and `page.pageErrors()`**: Return what the page already logged, up to the last 200 entries and only since the last navigation unless you pass `{ filter: 'all' }`.
 
 ## When to Use This Pattern
 

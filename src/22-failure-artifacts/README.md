@@ -19,3 +19,7 @@ You want failures to be debuggable in under a minute: trace, screenshot, video, 
 ## When to use
 
 - Every project; adjust what you attach based on what helps your team (API body, console, network log).
+
+## Reading logs after the fact
+
+`page.consoleMessages()` and `page.pageErrors()` return what the page already logged, up to the last 200 entries and only since the last navigation unless you pass `{ filter: 'all' }`.

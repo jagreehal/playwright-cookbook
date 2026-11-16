@@ -1,3 +1,6 @@
+import { existsSync, rmSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { setTimeout } from 'node:timers/promises';
 import { test as base, expect } from '@playwright/test';
 
 const dbConnection: { connected: boolean; initCount: number } = {
@@ -58,4 +61,16 @@ test.describe('33-worker-scoped-fixtures: Expensive setup once per worker', () =
     expect(workerCleanup).toContain('test-id-A');
     expect(workerCleanup).toContain('test-id-B');
   });
+
+  // One shared resource that cannot be split per worker. Each test fails if it
+  // finds another test already holding the marker file.
+  for (const name of ['first', 'second', 'third']) {
+    test(`lock: ${name} test never overlaps the others`, { lock: 'shared-marker' }, async ({}, testInfo) => {
+      const marker = path.join(testInfo.project.outputDir, 'shared-marker');
+      expect(existsSync(marker)).toBe(false);
+      writeFileSync(marker, name);
+      await setTimeout(300);
+      rmSync(marker);
+    });
+  }
 });

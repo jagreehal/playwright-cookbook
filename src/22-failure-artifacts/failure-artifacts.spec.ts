@@ -88,4 +88,17 @@ test.describe('22-failure-artifacts: Error capture fixture', () => {
     await page.goto('/cards/22');
     await expect(page.getByTestId('person-name')).toHaveText('No Such Person');
   });
+
+  test('page.consoleMessages() resets on navigation unless you ask for all', async ({ page }) => {
+    const booms = async (options?: { filter: 'all' }) =>
+      (await page.consoleMessages(options)).filter((message) => message.text() === 'boom');
+
+    await page.goto('/cards/01');
+    await page.evaluate(() => console.error('boom'));
+    await expect.poll(async () => (await booms()).length).toBe(1);
+
+    await page.goto('/cards/02');
+    expect(await booms()).toHaveLength(0);
+    expect(await booms({ filter: 'all' })).toHaveLength(1);
+  });
 });

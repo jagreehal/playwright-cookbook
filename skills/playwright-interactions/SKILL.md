@@ -19,9 +19,12 @@ Each surface below has one Playwright API built for it. Use that API and the tes
 - Register a dialog handler before the click that opens the dialog. Playwright dismisses unhandled dialogs, so an unhandled `confirm()` returns `false`.
 - Enter frames with `frameLocator()` or `locator().contentFrame()`. Role and text locators pierce open shadow roots; XPath and closed roots stay out of reach.
 - Use `fill()` for plain fields and `pressSequentially()` only when the widget listens to key events.
+- `check()` on a disabled box that is already checked returns without error. Assert `toBeDisabled()` and `toBeChecked()` instead of acting on it.
+- A popup that calls `window.close()` inside its click handler can make `click()` reject with `Target page, context or browser has been closed` now and then. Accept that error only when `popup.isClosed()` is true, and make the final assertion on the opener.
 - Assert table order with `expect(rows).toHaveText([...])`. It retries; `allTextContents()` reads once.
 - Install `page.clock` before the page loads. Pause it with `pauseAt()` when the test counts ticks.
 - No `waitForTimeout`. Move the fake clock or wait on a web-first assertion.
+- Any Playwright call that runs script in the page (`evaluate`, `waitForFunction`, even a locator read) sets `navigator.userActivation`, as if the user had clicked. Audio, clipboard, fullscreen and popups then pass in tests and fail for users who have not touched the page. To test the no-gesture path, run the code from `addInitScript`, report through `console`, wait with `page.waitForEvent('console')`, and make no other page call first. In automated Chrome, audio may start without a gesture anyway, so also replace the gated API with a stand-in that waits for a trusted `pointerdown`.
 
 ## Workflow
 

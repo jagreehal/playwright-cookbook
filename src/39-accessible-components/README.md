@@ -72,6 +72,7 @@ pnpm test src/39-accessible-components
   region, errors in `role="alert"`. The test reads them the way a user is told.
 - **axe and role queries catch different bugs**: a placeholder satisfies axe's
   name computation, but `getByLabel` still finds nothing. Keep both nets.
+- **`toMatchAriaSnapshot()`**: Checks a whole accessibility structure in one retrying assertion. It matches partially, so list only what the test cares about.
 
 ## When to Use This Pattern
 

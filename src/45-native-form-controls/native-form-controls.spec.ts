@@ -57,6 +57,13 @@ test.describe('45-native-form-controls: inputs, checks, selects, hover, clicks, 
 
     await expect(page.getByLabel('Locked preference')).toBeDisabled();
     await expect(page.getByLabel('Locked preference')).toBeChecked();
+
+    // check() returns without error: the box is already in the target state.
+    await page.getByLabel('Locked preference').check();
+    // uncheck() has to change it, so it waits for an enabled box and times out.
+    await expect(page.getByLabel('Locked preference').uncheck({ timeout: 500 })).rejects.toThrow(
+      /Timeout 500ms exceeded/,
+    );
   });
 
   test('a radio group allows one choice', async ({ page }) => {

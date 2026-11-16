@@ -163,6 +163,8 @@ pnpm test src/17-accessibility-axe
    - Axe scans add ~100-500ms per call
    - Run on key pages, not every `page.goto()` in a large suite
 
+5. **Looking for unnamed controls with `{ name: '' }`**: It matches every button, named or not. Compare `getByRole('button')` with `getByRole('button', { name: /./ })`. Any gap is a button with no name.
+
 ## Flow Diagram
 
 ```mermaid

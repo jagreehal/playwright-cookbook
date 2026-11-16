@@ -22,6 +22,7 @@ WebMCP lets a page register tools an agent can call via `document.modelContext.r
 - Probe on `http://localhost`, never a `data:` URL (opaque origin, no `modelContext`).
 - Detect `executeTool` separately from `modelContext`. It is a Chromium preview extension.
 - Assert user-visible state after a tool call. A handler can report success while the DOM never moves.
+- A tool called through `page.evaluate` runs with a user gesture, because Playwright's page calls set `navigator.userActivation`. A tool that plays audio, writes the clipboard or opens a window passes in tests for that reason alone. Test those tools with the gated API replaced by a stand-in, as below.
 
 ## Workflow
 
@@ -95,6 +96,28 @@ test('an agent calling a tool changes what the user sees', async ({ page }) => {
   });
   expect(JSON.parse(result)).toMatchObject({ sku: 'espresso' });
   await expect(page.getByTestId('cart-count')).toHaveText('2');
+});
+```
+
+Gesture-gated tool: replace the browser's rule before the page loads, then check what the page tells the user.
+
+```ts
+test('play before any gesture asks the user to press Play', async ({ page }) => {
+  await page.addInitScript(() => {
+    let used = false;
+    addEventListener('pointerdown', (event) => (used ||= event.isTrusted), true);
+    const resume = AudioContext.prototype.resume;
+    AudioContext.prototype.resume = function () {
+      return used ? resume.call(this) : new Promise<void>(() => {});
+    };
+  });
+  await page.goto('/player');
+  await page.evaluate(async () => {
+    const play = (await document.modelContext!.getTools()).find((tool) => tool.name === 'play');
+    return document.modelContext!.executeTool!(play!, '{}');
+  });
+  // A listitem takes no name from its text, so filter by text instead of { name }.
+  await expect(page.getByRole('listitem').filter({ hasText: 'Press Play to hear it' })).toBeVisible();
 });
 ```
 

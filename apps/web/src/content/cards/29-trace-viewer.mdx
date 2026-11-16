@@ -44,6 +44,7 @@ npx playwright show-report
 
 - Timeline scrubbing, before/after DOM snapshots, network tab, console tab, source tab.
 - Recommended CI setting: `'on-first-retry'` — no overhead on passing tests.
+- **`npx playwright trace`**: Reads a trace from the terminal, with no browser. Run `open`, then `actions --errors-only`, `requests --failed`, `console --errors-only`, or `errors`, and finish with `close`. It suits agents and CI machines.
 
 ## Related Patterns
 

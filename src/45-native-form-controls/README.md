@@ -70,6 +70,7 @@ pnpm test src/45-native-form-controls
 3. **Asserting error text with `getByText`**: Proves the text exists. Use `toHaveAccessibleDescription` on the field.
 4. **`pressSequentially` everywhere**: Slower and noisier than `fill`. Use it for key-driven widgets only.
 5. **Reading `inputValue()` into a variable and comparing**: A one-shot read. `toHaveValue` retries until it holds.
+6. **Calling `check()` on a disabled box to prove it is locked**: If the box is already checked, `check()` returns without error and proves nothing. `uncheck()` is the call that times out. Assert `toBeDisabled()` and `toBeChecked()`.
 
 ## Flow Diagram
 

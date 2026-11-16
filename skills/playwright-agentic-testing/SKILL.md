@@ -21,7 +21,7 @@ you care about. Never leave the live agent loop as a PR gate.
 - Agentic runs are on-demand: exploration, flake hunting, production repro.
 - Known paths become committed Playwright tests with web-first assertions.
 - Do not put Playwright MCP (or shell CLI agent loops) in high-frequency CI.
-- Prefer structured browser tools (MCP) over ad-hoc shell CLIs when reliability matters.
+- Use Playwright's own browser tools, MCP or `playwright-cli`, over ad-hoc scripts. `npx playwright init-skills` installs the skill for the CLI.
 - Review agent-written drafts with `playwright-architecture`, `playwright-locators`, and `playwright-assertions` before merging.
 - If a cheaper tier already owns the claim, push the assertion down — do not agentic-reprove it.
 

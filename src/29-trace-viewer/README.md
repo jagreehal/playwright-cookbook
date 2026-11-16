@@ -79,6 +79,7 @@ npx playwright show-report
 - **`npx playwright show-report`**: Opens the full HTML report; click any test to view its trace.
 - **Timeline scrubbing**: Drag the timeline to see DOM state at any point in the test.
 - **Network inspection**: See every request, including mocked ones, with full payloads.
+- **`npx playwright trace`**: Reads a trace from the terminal, with no browser. Run `open`, then `actions --errors-only`, `requests --failed`, `console --errors-only`, or `errors`, and finish with `close`. It suits agents and CI machines.
 
 ## When to Use This Pattern
 

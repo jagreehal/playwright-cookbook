@@ -43,9 +43,29 @@ npx playwright test e2e/foo.spec.ts -g "can save profile" --repeat-each=30 --wor
 # 3) headed + inspector
 PWDEBUG=1 npx playwright test e2e/foo.spec.ts -g "can save profile"
 
-# 4) open trace
+# 4) open trace in the viewer
 npx playwright show-trace test-results/**/trace.zip
+
+# 5) re-run only what failed last time
+npx playwright test --last-failed
 ```
+
+## Reading a Trace Without a Browser
+
+`npx playwright trace` answers the same questions from the terminal, which suits agents and CI machines. All commands after `open` use the opened trace.
+
+```bash
+npx playwright trace open test-results/<test-folder>/trace.zip
+npx playwright trace actions --errors-only     # which step failed
+npx playwright trace action 12                 # params, logs, source for that step
+npx playwright trace requests --failed         # status >= 400
+npx playwright trace console --errors-only
+npx playwright trace errors                    # errors with stack traces
+npx playwright trace snapshot 12               # accessibility snapshot at that step
+npx playwright trace close
+```
+
+A retried test writes one folder per attempt (`...-retry1`). Open the attempt you care about, and check the folder name first: a `setup` project writes traces too.
 
 ## Symptom -> Cause -> Fix
 
@@ -54,6 +74,36 @@ npx playwright show-trace test-results/**/trace.zip
 - Passes on retry only -> race condition -> remove snapshot reads / sleeps, use web-first assertions.
 - Fails only CI -> env differences -> pin viewport/timezone/locale; never rely on `networkidle` (racy everywhere, worse on CI) — wait on a specific response or web-first assertion.
 - Random 5xx/429 -> upstream dependency -> mock route or split into integration-tagged tests.
+
+## Regression After a Playwright Upgrade
+
+When a test passes on one Playwright version and fails on the next, prove it outside your app. Install both versions side by side and run one small spec in each.
+
+```bash
+mkdir -p /tmp/pw-good/tests /tmp/pw-bad/tests
+(cd /tmp/pw-good && npm init -y && npm i -D @playwright/test@<good> && npx playwright install chromium)
+(cd /tmp/pw-bad  && npm init -y && npm i -D @playwright/test@<bad>  && npx playwright install chromium)
+```
+
+Give both folders the same spec and a config with one project, so each run reports one result:
+
+```ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  testDir: './tests',
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+});
+```
+
+- Skip `npm init playwright@latest`. It prompts, and its three browser projects multiply the output.
+- Confirm the difference is real before reading any code.
+- What shipped is in `node_modules/playwright-core/lib/` and `node_modules/playwright/lib/`. Much of it is bundled, so search for the function and compare that, not whole files.
+- You can edit that compiled JS in the throwaway install to test a theory. Node loads it with no build step.
+
+## Reporting a Playwright or Browser Bug
+
+Reduce the failure to a spec with no app code, using `page.setContent()` or a route. Then state what fails, expected versus actual, the Playwright version, the browser, the OS, and the root cause if you found it. For a regression, quote the changed code from both versions. If the fault is in the browser, a repro with no Playwright at all is worth the effort, because the browser's owners can run it directly.
 
 ## Anti-Patterns
 

@@ -138,4 +138,55 @@ test.describe('43-premature-pass-races: assertions that pass before the app does
     await sorted;
     await expect(page.getByRole('list')).toHaveAttribute('data-sort', 'date');
   });
+
+  // The handler counts each submit it receives. Native validation runs first,
+  // so a submit the browser blocks never reaches it. Pass novalidate to turn
+  // that off and let the app validate.
+  const workEmailForm = (attributes = '') => `
+    <form ${attributes}>
+      <label>Email <input type="email" name="email" /></label>
+      <button>Save</button>
+      <p role="alert"></p>
+      <p role="status">Attempts: 0</p>
+    </form>
+    <script>
+      let attempts = 0;
+      document.querySelector('form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        attempts += 1;
+        document.querySelector('[role="status"]').textContent = 'Attempts: ' + attempts;
+        const email = event.target.email.value;
+        document.querySelector('[role="alert"]').textContent = email.includes('@')
+          ? 'Use your work email'
+          : 'Enter a valid email';
+      });
+    </script>
+  `;
+
+  test('a submit the browser blocks leaves the last error on screen', async ({ page }) => {
+    await page.setContent(workEmailForm());
+    await page.getByLabel('Email').fill('ada@gmail.com');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByRole('alert')).toHaveText('Use your work email');
+
+    await page.getByLabel('Email').fill('not-an-email');
+    await page.getByRole('button', { name: 'Save' }).click();
+    // The browser blocked this submit. The error is left over from the
+    // first attempt, so it says nothing about this one.
+    await expect(page.getByRole('alert')).toBeVisible();
+    // The second click never reached the handler.
+    await expect(page.getByRole('status')).toHaveText('Attempts: 1');
+  });
+
+  test('prove the attempt ran before trusting its error', async ({ page }) => {
+    await page.setContent(workEmailForm('novalidate'));
+    await page.getByLabel('Email').fill('ada@gmail.com');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByRole('alert')).toHaveText('Use your work email');
+
+    await page.getByLabel('Email').fill('not-an-email');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByRole('status')).toHaveText('Attempts: 2'); // this attempt ran
+    await expect(page.getByRole('alert')).toHaveText('Enter a valid email'); // and this is its error
+  });
 });

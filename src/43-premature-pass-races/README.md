@@ -8,7 +8,7 @@ Auto-waiting fixes the assertions that would otherwise fail too early. It does n
 
 These are the worst kind of flake, because they usually do not flake. They pass in CI for months, and the day the feature breaks they keep passing.
 
-Four shapes cover almost all of them.
+Five shapes cover almost all of them.
 
 | Shape | Why it passes early | Fix |
 |-------|---------------------|-----|
@@ -16,6 +16,7 @@ Four shapes cover almost all of them.
 | Silent success (busy already hidden) | You only asserted the end state, which is also the never-started state | Assert busy appears, then clears |
 | Sync read + static `expect` | `innerText()` resolves once; `toContain` matches text that is already on screen | Pass the locator to the matcher, not the string |
 | Re-fetch that renders the same thing | Nothing visible changes, so the matcher matches the *stale* DOM | Register `waitForApi` before the click |
+| Blocked action | The browser stops the submit, so the app never runs and the last attempt's error is still on screen | Prove this attempt ran, then assert its result |
 
 ## Code Example
 

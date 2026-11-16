@@ -33,6 +33,10 @@ The standard scoping options are:
 
 Prefer narrowing scope with `.include()` or `.exclude()` over disabling rules, so you keep coverage where it counts.
 
+### Counting unnamed controls without axe
+
+For one quick check, compare two role counts. `getByRole('button', { name: /./ })` keeps buttons whose name has at least one character, so any gap between it and `getByRole('button')` is a button with no name. Do not use `{ name: '' }`: it matches every button, named or not.
+
 ## When to use
 
 - Any critical user flow or layout. Run axe alongside functional assertions.

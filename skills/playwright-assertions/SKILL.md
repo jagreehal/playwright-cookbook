@@ -100,6 +100,32 @@ await expect(page.getByRole('button')).toHaveClass(/primary/);
 await expect(page.getByRole('button')).toHaveCSS('color', 'rgb(0, 0, 255)');
 ```
 
+`toHaveClass` matches the whole class list. `toContainClass('selected')` checks for one class and ignores the rest.
+
+### Accessibility tree
+
+```ts
+await expect(field).toHaveAccessibleDescription('Work address');   // aria-describedby
+await expect(field).toHaveAccessibleErrorMessage('Enter a valid email');   // aria-errormessage + aria-invalid
+await expect(element).toHaveRole('button');
+await expect(iconButton).toHaveAccessibleName('Close');
+```
+
+Use `toHaveAccessibleName` on an element you located some other way. After `getByRole('button', { name: 'Close' })` it cannot fail, because the locator already matched that name.
+
+`toMatchAriaSnapshot` checks a whole structure in one retrying assertion. It matches partially, so list only what the test cares about:
+
+```ts
+await expect(page.getByRole('navigation')).toMatchAriaSnapshot(`
+  - navigation "Main":
+    - list:
+      - listitem:
+        - link "Home"
+`);
+```
+
+Print the current tree with `await locator.ariaSnapshot()` to write one. `ariaSnapshot({ mode: 'ai' })` adds element refs for agents; keep it out of assertions.
+
 ### Page-level
 
 ```ts
@@ -262,6 +288,7 @@ If you're frequently overriding timeouts, the right answer is usually network mo
 | `expect(await locator.innerText()).toContain(...)` | Snapshot; the substring is often already true of the stale DOM | `await expect(locator).toHaveText(...)` |
 | `toHaveCount(0)` / `not.toBeVisible()` right after `goto` | Condition is true of the unrendered page | Wait for a same-pass landmark, then assert absence |
 | `toBeHidden()` as the only check after a silent action | Never-started is also hidden | Assert busy/`status` appears, then clears |
+| Asserting an error after a submit native validation can block | The handler never ran; the error on screen is left from an earlier attempt | Set `novalidate` so the app validates, and assert something only this attempt can produce |
 | `if (await locator.isVisible()) { ... }` | Branch on a racy snapshot | Restructure: assert the precondition or use `count() > 0` only when truly conditional |
 | `await page.waitForLoadState('networkidle')` | Vague, slow, often never fires with WebSockets | Wait for the *specific* thing you need with `waitForResponse` or an assertion |
 | `await page.waitForSelector('.foo')` | Old API, encourages CSS selectors | `await expect(page.getByRole(...)).toBeVisible()` |

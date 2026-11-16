@@ -10,6 +10,16 @@ That makes the skills available to Claude Code, Cursor, and other compatible age
 
 A runnable workshop that exercises the same patterns lives in the [playwright-cookbook](https://github.com/jagreehal/playwright-cookbook) repo. Cloning it is optional.
 
+## Skills that ship with Playwright
+
+`npx playwright init-skills` installs three skills from your installed Playwright version. They cover the tools. This pack covers how to design and keep a suite. Use both.
+
+| Playwright skill | Job | Pairs with |
+|---|---|---|
+| `playwright-cli` | Drive a browser from the terminal | `playwright-agentic-testing` |
+| `playwright-trace` | Full command reference for `npx playwright trace` | `playwright-debugging` |
+| `playwright-component-testing` | Story gallery and the built-in `mount` fixture | `playwright-components` |
+
 ## How to use a skill in your repo
 
 1. Doctor the project: find `playwright.config.*`, `testDir`, existing fixtures, and the package manager.
@@ -37,10 +47,10 @@ Start with **playwright-architecture** if the suite has no convention yet.
 | `playwright-test-data` | Factories, worker namespacing, teardown |
 | `playwright-network-mocking` | `page.route`, HAR, mock vs real |
 | `playwright-error-observability` | Fail on unexpected console/page errors |
-| `playwright-reliability` | Flake diagnosis and permanent fixes |
-| `playwright-debugging` | Trace, inspector, shortest path to a fix |
+| `playwright-reliability` | Flake diagnosis, cross-run flake metrics, permanent fixes |
+| `playwright-debugging` | Trace CLI, inspector, version regressions, bug reports |
 | `playwright-visual-regression` | Deterministic screenshots |
-| `playwright-ci` | Sharding, artifacts, gates |
+| `playwright-ci` | Sharding, artifacts, gates, red-build reports, upgrades |
 | `playwright-i18n` | Type-safe i18next + translated locators |
 | `playwright-shadcn` | Named-role tests for shadcn/base-ui |
 | `playwright-webmcp` | Two-lane tests for `document.modelContext` tools |

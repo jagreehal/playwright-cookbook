@@ -64,6 +64,7 @@ pnpm test src/34-retries-and-soft-assertions
 - **`test.fail(condition?, description?)`**: Call it inside the test body. If the test fails, it's expected (reported as "expected to fail"). If it passes unexpectedly, it fails with "expected to fail but passed", signalling the bug is fixed.
 - **`test.fixme(condition?, description?)`**: Skips the test entirely. Shows in report as "fixme".
 - **`test.skip(condition?, description?)`**: Conditional skip. Use `test.skip(browserName === 'webkit')` to skip a test on WebKit.
+- **Cross-run flakiness**: A retry shows a flake within one run. A final verdict that flips between runs is the stronger signal. The `playwright-reliability` skill has a script that flattens a JSON report for tracking this, and the spec runs that script.
 
 ## When to Use This Pattern
 

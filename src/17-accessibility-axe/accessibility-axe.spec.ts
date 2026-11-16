@@ -63,4 +63,19 @@ test.describe('17-accessibility-axe: Axe scan', () => {
 
     expect(results.violations).toHaveLength(0);
   });
+
+  test('role counts find a button with no accessible name', async ({ page }) => {
+    await page.setContent(`
+      <button aria-label="Close"><svg aria-hidden="true"></svg></button>
+      <button><svg aria-hidden="true"></svg></button>
+      <button>Publish</button>
+    `);
+
+    // An empty string matches every button, named or not.
+    await expect(page.getByRole('button', { name: '' })).toHaveCount(3);
+
+    // /./ needs one character, so the unnamed button drops out.
+    await expect(page.getByRole('button')).toHaveCount(3);
+    await expect(page.getByRole('button', { name: /./ })).toHaveCount(2);
+  });
 });

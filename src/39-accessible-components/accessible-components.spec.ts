@@ -128,4 +128,32 @@ test.describe('39-accessible-components: build the component so role-first queri
     // query still catches the gap a user hits the moment they start typing.
     await expect(page.locator('#bad').getByLabel('Email address')).toHaveCount(0);
   });
+
+  test('accessibility matchers read the tree, not the markup', async ({ page }) => {
+    await page.setContent(`
+      <nav aria-label="Main"><ul><li><a href="/a">Home</a></li><li><a href="/b">About</a></li></ul></nav>
+      <div class="card selected">Plan</div>
+      <label for="email">Email</label>
+      <input id="email" aria-invalid="true" aria-errormessage="email-error" aria-describedby="email-hint" />
+      <p id="email-hint">Work address</p>
+      <p id="email-error">Enter a valid email</p>
+    `);
+
+    // Partial match: About is on the page, and the snapshot does not need it.
+    await expect(page.getByRole('navigation')).toMatchAriaSnapshot(`
+      - navigation "Main":
+        - list:
+          - listitem:
+            - link "Home"
+    `);
+
+    const email = page.getByLabel('Email');
+    await expect(email).toHaveRole('textbox');
+    await expect(email).toHaveAccessibleDescription('Work address');
+    await expect(email).toHaveAccessibleErrorMessage('Enter a valid email');
+
+    // toHaveClass matches the whole list. toContainClass checks one class.
+    await expect(page.getByText('Plan')).toContainClass('selected');
+    await expect(page.getByText('Plan')).not.toHaveClass('selected');
+  });
 });
