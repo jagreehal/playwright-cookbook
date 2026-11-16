@@ -40,6 +40,7 @@ pnpm test src/33-worker-scoped-fixtures
 - **`scope: 'worker'`**: Setup once per worker, teardown once per worker exit.
 - **`scope: 'test'`** (default): Setup/teardown for every test.
 - **Use cases**: DB pools, API servers, Docker containers, auth token caches.
+- **Test locks**: Tests that share a `lock` name never run at the same time, across files and projects, while the rest of the suite stays parallel. Use one when a resource cannot be split per worker.
 
 ## Common Mistakes
 

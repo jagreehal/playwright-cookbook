@@ -4,10 +4,11 @@ ___temp
 **/.DS_Store
 playwright-report/
 test-results/
-docs/
+docs/*
+!docs/skill-catalog.md
 playwright/.auth/
 apps/web/.astro
 apps/web/dist/
 .pnpm-store
 test/fixtures/*.har
-docs
+.playwright-mcp/

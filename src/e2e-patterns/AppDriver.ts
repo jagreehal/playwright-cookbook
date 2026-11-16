@@ -18,8 +18,8 @@ import { loginAs } from './login/flow';
  * **Fixtures-based** (`fixtures.ts`) scales better for larger suites
  * (50+ specs). Each concern is an independent fixture, so Playwright
  * builds only what each test requests. Auto-fixtures run invisibly
- * without tests requesting them. The trade-off is a steeper learning
- * curve and more wiring in the composition root.
+ * without tests requesting them. The trade-off is more concepts to
+ * learn and more wiring in the composition root.
  *
  * Choose AppDriver when you value dead-simple discovery and don't need
  * auto-fixtures. Choose fixtures-based when you need lazy construction,

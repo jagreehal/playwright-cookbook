@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { test, expect } from '@playwright/test';
 import { makePerson } from '../swapi/builders';
 
@@ -90,5 +91,29 @@ test.describe('29-trace-viewer: Reading traces and the show-trace workflow', () 
 
     await page.goto('/cards/01');
     await expect(page.getByTestId('person-name')).toHaveText('API Debug Luke');
+  });
+
+  // `playwright trace` keeps one opened trace per machine, so the lock stops a
+  // repeated run from opening a second trace halfway through this one.
+  test('read a saved trace from the terminal', { lock: 'trace-cli' }, async ({ browser }, testInfo) => {
+    const zip = testInfo.outputPath('trace.zip');
+    const context = await browser.newContext();
+    await context.tracing.start({ snapshots: true });
+    const page = await context.newPage();
+    await page.setContent('<button>Save</button>');
+    await page.getByRole('button', { name: 'Save' }).click();
+    await context.tracing.stop({ path: zip });
+    await context.close();
+
+    const trace = (...args: string[]) =>
+      execFileSync('npx', ['playwright', 'trace', ...args], { encoding: 'utf8' });
+
+    expect(trace('open', zip)).toContain('Actions:');
+    try {
+      expect(trace('actions')).toContain("getByRole('button', { name: 'Save' })");
+      expect(trace('errors')).toContain('No errors');
+    } finally {
+      trace('close');
+    }
   });
 });

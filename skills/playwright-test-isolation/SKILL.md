@@ -102,6 +102,18 @@ testUser: async ({}, use) => {
 },
 ```
 
+## Test Locks for a Resource You Cannot Split
+
+Prefer worker-indexed data. When a few tests must touch one shared thing, such as a global settings row, a named lock stops them overlapping while the rest of the suite stays parallel. This holds across files and projects.
+
+```ts
+test('update user settings', { lock: 'user-settings' }, async ({ page }) => {
+  // Never runs at the same time as another test with this lock.
+});
+```
+
+A lock also works on `test.describe`. Prefer it to `workers: 1` or `test.describe.serial`, which slow or couple far more tests than the ones that collide.
+
 ## Database Isolation
 
 Three patterns, ordered by how much isolation they buy.

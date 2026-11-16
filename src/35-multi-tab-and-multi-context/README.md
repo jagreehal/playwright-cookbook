@@ -71,6 +71,7 @@ pnpm test src/35-multi-tab-and-multi-context
 2. **Using multiple `context.newPage()` when you need `browser.newContext()`**: New pages share storage; new contexts don't. If you need separate auth, use separate contexts.
 3. **Not closing extra pages/contexts**: Each open page/context consumes memory. Clean up with `.close()` in `afterEach`.
 4. **Assuming `context.pages()[1]` is the popup**: The order is not guaranteed. Use `waitForEvent('page')` to get the specific popup reference.
+5. **Clicking a button that closes its own popup**: If the page calls `window.close()` inside the click handler, `click()` can reject with `Target page, context or browser has been closed` while it finishes. It fails rarely, so it looks like random flakiness. Let the app close a moment later, or accept that error only once `popup.isClosed()` is true.
 
 ## Flow Diagram
 

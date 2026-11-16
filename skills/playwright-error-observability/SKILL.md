@@ -63,6 +63,17 @@ export const test = base.extend<Fixtures>({
 });
 ```
 
+## Reading Errors After the Fact
+
+`page.pageErrors()` and `page.consoleMessages()` return what the page already logged, which suits one check in one test. They keep up to the last 200 entries and return only those since the last navigation unless you pass `{ filter: 'all' }`. Keep the listener fixture above for suite-wide guards, because it sees every entry across navigations.
+
+```ts
+await expect.poll(async () => (await page.pageErrors()).length).toBe(0);
+const errors = (await page.consoleMessages({ filter: 'all' })).filter((m) => m.type() === 'error');
+```
+
+Call `page.clearConsoleMessages()` or `page.clearPageErrors()` to start a new window.
+
 ## Anti-Patterns
 
 - Ignoring console/page errors because tests "still pass".

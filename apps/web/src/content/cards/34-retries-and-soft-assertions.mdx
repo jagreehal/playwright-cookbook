@@ -51,6 +51,7 @@ pnpm test src/34-retries-and-soft-assertions
 - **`expect.poll()`**: Polls a sync or async getter with custom `intervals`.
 - **`expect.toPass()`**: Async retry callback.
 - **`test.fail()`/`test.fixme()`/`test.skip()`**: Intent signalling.
+- **Cross-run flakiness**: A retry shows a flake within one run. A final verdict that flips between runs is the stronger signal. The `playwright-reliability` skill has a script that flattens a JSON report for tracking this, and the spec runs that script.
 
 ## Common Mistakes
 

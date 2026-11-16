@@ -2,7 +2,7 @@
 
 ## What This Pattern Solves
 
-Stakeholders want readable, behaviour-style documentation ("given a user… when they… then…"), but classic BDD tools (Cucumber, `.feature` files + step definitions) add a parallel test layer you must maintain in lockstep with the real tests. [`executable-stories-playwright`](https://github.com/jagreehal/executable-stories) gives you the readable output **without** that second layer: keep writing ordinary Playwright `test()` blocks, add `story.init(testInfo)` and `given`/`when`/`then` markers, and a reporter turns each run into living documentation.
+Stakeholders want readable, behaviour-style documentation ("given a user… when they… then…"), but classic BDD tools (Cucumber, `.feature` files + step definitions) add a parallel test layer you must maintain in lockstep with the real tests. `executable-stories-playwright` gives you the readable output **without** that second layer: keep writing ordinary Playwright `test()` blocks, add `story.init(testInfo)` and `given`/`when`/`then` markers, and a reporter turns each run into living documentation.
 
 This cookbook already ships the reporter in `playwright.config.ts` — it runs on every `pnpm test`. Until a spec calls `story.init`, the reporter has nothing to document. This card is where the cookbook actually uses it.
 

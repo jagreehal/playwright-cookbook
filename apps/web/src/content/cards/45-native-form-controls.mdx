@@ -38,6 +38,7 @@ await expect(page.getByLabel('Email')).toHaveAccessibleDescription('Enter a vali
 - **`fill()` vs `pressSequentially()`**: `fill` sets the value and fires one `input` event. Key handlers see nothing. Reach for `pressSequentially` only when the widget reacts to individual keys.
 - **`clear()`**: Sends a Delete key after selecting the text, so key counters see one extra keydown.
 - **`check()` vs `click()`**: `click` toggles. `check` leaves a checked box checked and throws if the box ends up unchecked.
+- **`check()` on a disabled box**: If the box is already checked, `check()` returns without error. `uncheck()` is the call that times out. Assert `toBeDisabled()` and `toBeChecked()`.
 - **`setChecked(value)`**: Drive the target state from test data.
 - **`selectOption(string)`**: Matches by value or label. Pass `{ value }` or `{ label }` to be explicit.
 - **`toHaveValues([...])`**: The matcher for `<select multiple>`.

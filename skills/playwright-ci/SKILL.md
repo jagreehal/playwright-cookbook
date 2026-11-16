@@ -98,6 +98,26 @@ jobs:
 - Gate merge on smoke job.
 - Run integration/nightly separately.
 - Track and alert on "passed on retry" count.
+- Once the suite is stable, add `--fail-on-flaky-tests` (or `failOnFlakyTests: !!process.env.CI` in config). A test that passes only on retry then fails the build. Without it the run exits 0.
+- For a fast PR check, `--only-changed=origin/main` runs the test files changed since that ref. Keep a full run on the main branch, because a change to app code touches no test file.
+
+## Reading a Red Build
+
+Report by root cause, not by job. Download the failed job logs and the reports, then:
+
+1. Lead with a short summary. Group the same test failing across browsers, or the same error across tests, into one line.
+2. Sort each cause: regression from this commit, known flake, infrastructure, or platform-specific.
+3. Call out only what this commit introduced. Most red on a busy branch was already there.
+4. List the full failures underneath, as test, location, and error.
+
+Use `playwright-reliability` to tell a flake from a regression over several runs.
+
+## Upgrading Playwright
+
+- Pin an exact version of `@playwright/test`, and keep any Docker image on the same version.
+- Upgrade in its own PR, and read the Breaking Changes section of the release notes first.
+- Run the whole suite, not only the smoke job. A behavior change can make a passing action time out, or a failing one pass.
+- If a test changes outcome, prove it with two side-by-side installs (see `playwright-debugging`).
 
 ## Anti-Patterns
 

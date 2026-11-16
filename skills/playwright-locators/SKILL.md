@@ -57,6 +57,7 @@ page.getByRole('button', { name: 'Submit' });
 // Buttons / links / headings
 page.getByRole('button', { name: 'Submit', exact: true });
 page.getByRole('button', { name: /submit/i });             // regex for flexibility
+page.getByRole('button', { name: /./ });                   // named buttons only; { name: '' } matches all
 page.getByRole('link',   { name: 'Home' });
 page.getByRole('heading',{ name: 'Welcome', level: 1 });   // level pins to <h1>
 

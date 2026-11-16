@@ -24,7 +24,7 @@ This cookbook ships the patterns as **agent skills**: reusable capabilities that
 
 ### Install
 
-Install with the [skills CLI](https://github.com/vercel-labs/skills):
+Install with the skills CLI:
 
 ```bash
 # Install the full Playwright skills pack

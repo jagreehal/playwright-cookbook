@@ -120,4 +120,42 @@ test.describe('35-multi-tab-and-multi-context: Multi-tab, popups, multiple auth 
     await popup.close();
     expect(context.pages()).toHaveLength(1);
   });
+
+  test('popup: a button that closes its own window', async ({ page, context }) => {
+    await context.route('**/confirm-popup', (route) =>
+      route.fulfill({
+        contentType: 'text/html',
+        body: `
+          <button id="confirm">Confirm</button>
+          <script>
+            document.getElementById('confirm').addEventListener('click', () => {
+              window.opener.document.title = 'Confirmed';
+              window.close();
+            });
+          </script>
+        `,
+      }),
+    );
+    await page.goto('/cards/01');
+    await page.setContent(`
+      <button onclick="window.open('/confirm-popup', 'confirm', 'width=400,height=300')">Open</button>
+    `);
+
+    const popupPromise = page.waitForEvent('popup');
+    await page.getByRole('button', { name: 'Open' }).click();
+    const popup = await popupPromise;
+    const closed = popup.waitForEvent('close');
+
+    // A plain click() can rarely reject when the window closes under it.
+    // Accept that error only if the popup really closed.
+    await popup
+      .getByRole('button', { name: 'Confirm' })
+      .click()
+      .catch((error: unknown) => {
+        if (!popup.isClosed()) throw error;
+      });
+    await closed;
+
+    await expect(page).toHaveTitle('Confirmed');
+  });
 });

@@ -65,6 +65,7 @@ pnpm test src/33-worker-scoped-fixtures
 - **Fixture dependency rules**: Test fixtures can depend on worker fixtures. Worker fixtures can NOT depend on test fixtures (no `{ page }` in worker scope).
 - **Worker count**: A worker runs multiple tests sequentially. If you set `workers: 4`, you get 4 workers, each with its own worker-scoped fixture instance.
 - **Use cases**: Database connection pools, API servers, Docker containers, auth token caches.
+- **Test locks**: Tests that share a `lock` name never run at the same time, across files and projects, while the rest of the suite stays parallel. Use one when a resource cannot be split per worker.
 
 ## When to Use This Pattern
 

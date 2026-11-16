@@ -60,6 +60,7 @@ pnpm test src/35-multi-tab-and-multi-context
 1. Missing `waitForEvent` before the trigger (test hangs).
 2. Using `newPage()` when you need `newContext()` for auth isolation.
 3. Not closing extra pages/contexts (memory leaks).
+4. Clicking a button that closes its own popup: `click()` can reject now and then with `Target page, context or browser has been closed`. Let the app close a moment later, or accept that error only once `popup.isClosed()` is true.
 
 ## Related Patterns
 
