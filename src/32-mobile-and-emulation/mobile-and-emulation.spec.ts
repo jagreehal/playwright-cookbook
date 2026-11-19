@@ -66,13 +66,15 @@ test.describe('32-mobile-and-emulation: Devices, viewport, geolocation, permissi
     expect(prefersDark).toBe(true);
   });
 
-  test('permissions: grant clipboard-write permission', async ({ page, context }) => {
-    await context.grantPermissions(['clipboard-write']);
+  test('permissions: grant clipboard read/write permission', async ({ page, context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 
     await page.goto('/cards/01');
 
-    await page.evaluate(async () => {
+    const clipboard = await page.evaluate(async () => {
       await navigator.clipboard.writeText('test-permission');
+      return navigator.clipboard.readText();
     });
+    expect(clipboard).toBe('test-permission');
   });
 });

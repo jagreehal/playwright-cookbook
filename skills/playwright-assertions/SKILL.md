@@ -317,3 +317,4 @@ There is always a right tool. `waitForTimeout` does not wait for a condition; it
 
 - Run `npx playwright test` on the focused spec. Expect a pass.
 - The changed spec has no `waitForTimeout` and no snapshot `isVisible()` used as a wait.
+- `eslint-plugin-playwright` (`prefer-web-first-assertions`, `missing-playwright-await`, `expect-expect`) passes on the changed spec. Set it up via `playwright-ci`.
