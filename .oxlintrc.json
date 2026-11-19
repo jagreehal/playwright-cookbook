@@ -29,10 +29,31 @@
     },
     {
       "files": [
-        "src/**/*.spec.ts"
+        "src/**/*.ts",
+        "test-utils/**/*.ts",
+        "*.config.ts"
+      ],
+      "rules": {
+        "playwright/missing-playwright-await": "error",
+        "typescript/no-floating-promises": "error",
+        "typescript/no-misused-promises": "error"
+      }
+    },
+    {
+      "files": [
+        "src/**/*.spec.ts",
+        "src/**/*.setup.ts"
       ],
       "rules": {
         "playwright/consistent-spacing-between-blocks": "warn",
+        "playwright/expect-expect": [
+          "warn",
+          {
+            "assertFunctionPatterns": [
+              "^(assert|expect)[A-Z]"
+            ]
+          }
+        ],
         "playwright/max-nested-describe": "warn",
         "playwright/missing-playwright-await": "error",
         "playwright/no-conditional-expect": "warn",
