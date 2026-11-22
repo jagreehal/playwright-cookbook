@@ -150,9 +150,9 @@ See cards **16** (debug unhandled requests), **22** (failure artifacts), and **2
 
 ## Linting and type checking
 
-[Oxlint](https://oxc.rs/docs/guide/usage/linter) lints the repo with its `correctness` rules, plus `eslint-plugin-playwright`'s recommended rules loaded as a JS plugin on spec files. The config lives in [`.oxlintrc.json`](./.oxlintrc.json).
+[Oxlint](https://oxc.rs/docs/guide/usage/linter) lints the repo with its `correctness` rules, plus `eslint-plugin-playwright`'s recommended rules loaded as a JS plugin on spec and setup files. `expect-expect` counts `assert*` and `expect*` helpers as assertions. The config lives in [`.oxlintrc.json`](./.oxlintrc.json).
 
-`--type-aware` turns on `no-floating-promises` and `no-misused-promises`. They catch an unawaited Playwright action at lint time, the same mistake that makes a test flaky. Type-aware rules run on `oxlint-tsgolint`, which uses the TypeScript 7 native compiler. `pnpm typecheck` runs that compiler (`tsc`) too.
+`--type-aware` turns on `no-floating-promises` and `no-misused-promises` for every test-side file: specs, page objects, fixtures, helpers and configs. They catch an unawaited Playwright action at lint time, the same mistake that makes a test flaky. Type-aware rules run on `oxlint-tsgolint`, which uses the TypeScript 7 native compiler. `pnpm typecheck` runs that compiler (`tsc`) too.
 
 ```bash
 pnpm lint          # oxlint --type-aware

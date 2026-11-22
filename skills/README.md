@@ -50,7 +50,7 @@ Start with **playwright-architecture** if the suite has no convention yet.
 | `playwright-reliability` | Flake diagnosis, cross-run flake metrics, permanent fixes |
 | `playwright-debugging` | Trace CLI, inspector, version regressions, bug reports |
 | `playwright-visual-regression` | Deterministic screenshots |
-| `playwright-ci` | Sharding, artifacts, gates, red-build reports, upgrades |
+| `playwright-ci` | Sharding, artifacts, gates, test linting, red-build reports, upgrades |
 | `playwright-i18n` | Type-safe i18next + translated locators |
 | `playwright-shadcn` | Named-role tests for shadcn/base-ui |
 | `playwright-webmcp` | Two-lane tests for `document.modelContext` tools |
